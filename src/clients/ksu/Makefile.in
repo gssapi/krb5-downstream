@@ -3,12 +3,14 @@ BUILDTOP=$(REL)..$(S)..
 DEFINES = -DGET_TGT_VIA_PASSWD -DPRINC_LOOK_AHEAD -DCMD_PATH='"/usr/local/sbin /usr/local/bin /sbin /bin /usr/sbin /usr/bin"'
 
 KSU_LIBS=@KSU_LIBS@
+PAM_LIBS=@PAM_LIBS@
 
 SRCS = \
 	$(srcdir)/krb_auth_su.c \
 	$(srcdir)/ccache.c \
 	$(srcdir)/authorization.c \
 	$(srcdir)/main.c \
+	$(srcdir)/pam.c \
 	$(srcdir)/heuristic.c \
 	$(srcdir)/xmalloc.c \
 	$(srcdir)/setenv.c
@@ -17,13 +19,17 @@ OBJS = \
 	ccache.o \
 	authorization.o \
 	main.o \
+	pam.o \
 	heuristic.o \
 	xmalloc.o @SETENVOBJ@
 
 all: ksu
 
 ksu: $(OBJS) $(KRB5_BASE_DEPLIBS)
-	$(CC_LINK) -o $@ $(OBJS) $(KRB5_BASE_LIBS) $(KSU_LIBS)
+	$(CC_LINK) -o $@ $(OBJS) $(KRB5_BASE_LIBS) $(KSU_LIBS) $(PAM_LIBS)
+
+pam.o: pam.c
+	$(CC) $(ALL_CFLAGS) -c $<
 
 clean:
 	$(RM) ksu
