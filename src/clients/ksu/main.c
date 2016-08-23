@@ -26,12 +26,17 @@
  * KSU was written by:  Ari Medvinsky, ari@isi.edu
  */
 
+#include "autoconf.h"
 #include "ksu.h"
 #include "adm_proto.h"
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <signal.h>
 #include <grp.h>
+
+#ifdef USE_PAM
+#include "pam.h"
+#endif
 
 /* globals */
 char * prog_name;
@@ -40,6 +45,7 @@ char k5login_path[MAXPATHLEN];
 char k5users_path[MAXPATHLEN];
 char * gb_err = NULL;
 int quiet = 0;
+int force_fork = 0;
 /***********/
 
 #define KS_TEMPORARY_CACHE "MEMORY:_ksu"
@@ -523,6 +529,23 @@ main(int argc, char ** argv)
                prog_name,target_user,client_name,
                source_user,ontty());
 
+#ifdef USE_PAM
+        if (appl_pam_enabled(ksu_context, "ksu")) {
+            if (appl_pam_acct_mgmt(KSU_PAM_SERVICE, 1, target_user, NULL,
+                                   NULL, source_user,
+                                   ttyname(STDERR_FILENO)) != 0) {
+                fprintf(stderr, "Access denied for %s.\n", target_user);
+                exit(1);
+            }
+            if (appl_pam_requires_chauthtok()) {
+                fprintf(stderr, "Password change required for %s.\n",
+                        target_user);
+                exit(1);
+            }
+            force_fork++;
+        }
+#endif
+
         /* Run authorization as target.*/
         if (krb5_seteuid(target_uid)) {
             com_err(prog_name, errno, _("while switching to target for "
@@ -583,6 +606,24 @@ main(int argc, char ** argv)
 
             exit(1);
         }
+#ifdef USE_PAM
+    } else {
+        /* we always do PAM account management, even for root */
+        if (appl_pam_enabled(ksu_context, "ksu")) {
+            if (appl_pam_acct_mgmt(KSU_PAM_SERVICE, 1, target_user, NULL,
+                                   NULL, source_user,
+                                   ttyname(STDERR_FILENO)) != 0) {
+                fprintf(stderr, "Access denied for %s.\n", target_user);
+                exit(1);
+            }
+            if (appl_pam_requires_chauthtok()) {
+                fprintf(stderr, "Password change required for %s.\n",
+                        target_user);
+                exit(1);
+            }
+            force_fork++;
+        }
+#endif
     }
 
     if( some_rest_copy){
@@ -639,6 +680,30 @@ main(int argc, char ** argv)
         fprintf(stderr, _("ksu: couldn't set environment variable SHELL\n"));
         exit(1);
     }
+
+#ifdef USE_PAM
+    if (appl_pam_enabled(ksu_context, "ksu")) {
+        if (appl_pam_session_open() != 0) {
+            fprintf(stderr, "Error opening session for %s.\n", target_user);
+            exit(1);
+        }
+#ifdef DEBUG
+        if (auth_debug){
+            printf(" Opened PAM session.\n");
+        }
+#endif
+        if (appl_pam_cred_init()) {
+            fprintf(stderr, "Error initializing credentials for %s.\n",
+                    target_user);
+            exit(1);
+        }
+#ifdef DEBUG
+        if (auth_debug){
+            printf(" Initialized PAM credentials.\n");
+        }
+#endif
+    }
+#endif
 
     /* set permissions */
     if (setgid(target_pwd->pw_gid) < 0) {
@@ -737,7 +802,7 @@ main(int argc, char ** argv)
         fprintf(stderr, "program to be execed %s\n",params[0]);
     }
 
-    if( keep_target_cache ) {
+    if( keep_target_cache && !force_fork ) {
         execv(params[0], params);
         com_err(prog_name, errno, _("while trying to execv %s"), params[0]);
         sweep_up(ksu_context, cc_target);
@@ -767,16 +832,36 @@ main(int argc, char ** argv)
             if (ret_pid == -1) {
                 com_err(prog_name, errno, _("while calling waitpid"));
             }
-            sweep_up(ksu_context, cc_target);
+            /* Destroy the target ccache unless -k was specified. */
+            if( !keep_target_cache ) {
+                sweep_up(ksu_context, cc_target);
+            }
             exit (WIFEXITED(statusp) ? WEXITSTATUS(statusp) : 1);
         case -1:
             com_err(prog_name, errno, _("while trying to fork."));
             sweep_up(ksu_context, cc_target);
             exit (1);
         case 0:
+#ifdef USE_PAM
+            if (appl_pam_enabled(ksu_context, "ksu")) {
+                if (appl_pam_setenv() != 0) {
+                    fprintf(stderr, "Error setting up environment for %s.\n",
+                            target_user);
+                    exit (1);
+                }
+#ifdef DEBUG
+                if (auth_debug){
+                    printf(" Set up PAM environment.\n");
+                }
+#endif
+            }
+#endif
             execv(params[0], params);
             com_err(prog_name, errno, _("while trying to execv %s"),
                     params[0]);
+            if( keep_target_cache ) {
+                sweep_up(ksu_context, cc_target);
+            }
             exit (1);
         }
     }

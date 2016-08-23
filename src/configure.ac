@@ -1407,6 +1407,8 @@ AC_SUBST([VERTO_VERSION])
 
 AC_PATH_PROG(GROFF, groff)
 
+KRB5_WITH_PAM
+
 # Make localedir work in autoconf 2.5x.
 if test "${localedir+set}" != set; then
     localedir='$(datadir)/locale'

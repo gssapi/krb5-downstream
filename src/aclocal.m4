@@ -1413,3 +1413,72 @@ if test "$with_ldap" = yes; then
   OPENLDAP_PLUGIN=yes
 fi
 ])dnl
+dnl
+dnl
+dnl Use PAM instead of local crypt() compare for checking local passwords,
+dnl and perform PAM account, session management, and password-changing where
+dnl appropriate.
+dnl
+AC_DEFUN(KRB5_WITH_PAM,[
+AC_ARG_WITH(pam,[AC_HELP_STRING(--with-pam,[compile with PAM support])],
+	    withpam="$withval",withpam=auto)
+AC_ARG_WITH(pam-ksu-service,[AC_HELP_STRING(--with-ksu-service,[PAM service name for ksu ["ksu"]])],
+	    withksupamservice="$withval",withksupamservice=ksu)
+old_LIBS="$LIBS"
+PAM_LIBS=
+if test "$withpam" != no ; then
+	AC_MSG_RESULT([checking for PAM...])
+
+	AC_CHECK_HEADERS(security/pam_appl.h)
+	if test "x$ac_cv_header_security_pam_appl_h" != xyes ; then
+		if test "$withpam" = auto ; then
+			AC_MSG_RESULT([Unable to locate security/pam_appl.h.])
+			withpam=no
+		else
+			AC_MSG_ERROR([Unable to locate security/pam_appl.h.])
+		fi
+	else
+		LIBS=
+		unset ac_cv_func_pam_start
+		AC_CHECK_FUNCS(putenv pam_start)
+		if test "x$ac_cv_func_pam_start" = xno ; then
+			unset ac_cv_func_pam_start
+			AC_CHECK_LIB(dl,dlopen)
+			AC_CHECK_FUNCS(pam_start)
+			if test "x$ac_cv_func_pam_start" = xno ; then
+				AC_CHECK_LIB(pam,pam_start)
+				unset ac_cv_func_pam_start
+				unset ac_cv_func_pam_getenvlist
+				AC_CHECK_FUNCS(pam_start pam_getenvlist)
+				if test "x$ac_cv_func_pam_start" = xyes ; then
+					PAM_LIBS="$LIBS"
+				else
+					if test "$withpam" = auto ; then
+						AC_MSG_RESULT([Unable to locate libpam.])
+						withpam=no
+					else
+						AC_MSG_ERROR([Unable to locate libpam.])
+					fi
+				fi
+			fi
+		fi
+		if test "$withpam" != no ; then
+			AC_MSG_NOTICE([building with PAM support])
+			AC_DEFINE(USE_PAM,1,[Define if Kerberos-aware tools should support PAM])
+			AC_DEFINE_UNQUOTED(KSU_PAM_SERVICE,"$withksupamservice",
+					   [Define to the name of the PAM service name to be used by ksu.])
+			PAM_LIBS="$LIBS"
+			NON_PAM_MAN=".\\\" "
+			PAM_MAN=
+		fi
+	fi
+	if test "$withpam" = no ; then
+		PAM_MAN=".\\\" "
+		NON_PAM_MAN=
+	fi
+fi
+LIBS="$old_LIBS"
+AC_SUBST(PAM_LIBS)
+AC_SUBST(PAM_MAN)
+AC_SUBST(NON_PAM_MAN)
+])dnl
