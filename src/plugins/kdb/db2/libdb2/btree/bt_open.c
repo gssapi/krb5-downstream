@@ -60,6 +60,7 @@ static char sccsid[] = "@(#)bt_open.c	8.11 (Berkeley) 11/2/95";
 #include <string.h>
 #include <unistd.h>
 
+#include "k5-int.h"
 #include "db-int.h"
 #include "btree.h"
 
@@ -201,7 +202,7 @@ __bt_open(const char *fname, int flags, int mode, const BTREEINFO *openinfo,
 			goto einval;
 		}
 
-		if ((t->bt_fd = open(fname, flags | O_BINARY, mode)) < 0)
+		if ((t->bt_fd = THREEPARAMOPEN(fname, flags | O_BINARY, mode)) < 0)
 			goto err;
 
 	} else {

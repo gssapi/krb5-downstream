@@ -837,7 +837,7 @@ write_pid_file(const char *path)
     unsigned long pid;
     int st1, st2;
 
-    file = fopen(path, "w");
+    file = WRITABLEFOPEN(path, "w");
     if (file == NULL)
         return errno;
     pid = (unsigned long)getpid();

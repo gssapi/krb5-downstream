@@ -40,6 +40,7 @@ DL_LIB='@DL_LIB@'
 DEFCCNAME='@DEFCCNAME@'
 DEFKTNAME='@DEFKTNAME@'
 DEFCKTNAME='@DEFCKTNAME@'
+SELINUX_LIBS='@SELINUX_LIBS@'
 
 LIBS='@LIBS@'
 
@@ -252,7 +253,7 @@ if test -n "$do_libs"; then
     fi
 
     # If we ever support a flag to generate output suitable for static
-    # linking, we would output "-lkrb5support $LIBS $DL_LIB" here.
+    # linking, we would output "-lkrb5support $LIBS $SELINUX_LIBS $DL_LIB" here.
 
     echo $lib_flags
 fi
