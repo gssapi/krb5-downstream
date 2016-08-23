@@ -51,6 +51,7 @@ static char sccsid[] = "@(#)hash.c	8.12 (Berkeley) 11/7/95";
 #include <assert.h>
 #endif
 
+#include "k5-int.h"
 #include "db-int.h"
 #include "hash.h"
 #include "page.h"
@@ -127,7 +128,7 @@ __kdb2_hash_open(const char *file, int flags, int mode, const HASHINFO *info,
 		new_table = 1;
 	}
 	if (file) {
-		if ((hashp->fp = open(file, flags|O_BINARY, mode)) == -1)
+		if ((hashp->fp = THREEPARAMOPEN(file, flags|O_BINARY, mode)) == -1)
 			RETURN_ERROR(errno, error0);
 		(void)fcntl(hashp->fp, F_SETFD, 1);
 	}

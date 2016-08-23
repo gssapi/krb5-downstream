@@ -512,7 +512,7 @@ ulog_map(krb5_context context, const char *logname, uint32_t ulogentries)
         return ENOMEM;
 
     if (stat(logname, &st) == -1) {
-        log_ctx->ulogfd = open(logname, O_RDWR | O_CREAT, 0600);
+        log_ctx->ulogfd = THREEPARAMOPEN(logname, O_RDWR | O_CREAT, 0600);
         if (log_ctx->ulogfd == -1) {
             retval = errno;
             goto cleanup;

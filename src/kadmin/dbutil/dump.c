@@ -134,12 +134,21 @@ create_ofile(char *ofile, char **tmpname)
 {
     int fd = -1;
     FILE *f;
+#ifdef USE_SELINUX
+    void *selabel;
+#endif
 
     *tmpname = NULL;
     if (asprintf(tmpname, "%s-XXXXXX", ofile) < 0)
         goto error;
 
+#ifdef USE_SELINUX
+    selabel = krb5int_push_fscreatecon_for(ofile);
+#endif
     fd = mkstemp(*tmpname);
+#ifdef USE_SELINUX
+    krb5int_pop_fscreatecon(selabel);
+#endif
     if (fd == -1)
         goto error;
 
@@ -183,7 +192,7 @@ prep_ok_file(krb5_context context, char *file_name, int *fd_out)
         goto cleanup;
     }
 
-    fd = open(file_ok, O_WRONLY | O_CREAT | O_TRUNC, 0600);
+    fd = THREEPARAMOPEN(file_ok, O_WRONLY | O_CREAT | O_TRUNC, 0600);
     if (fd == -1) {
         com_err(progname, errno, _("while creating 'ok' file, '%s'"), file_ok);
         goto cleanup;

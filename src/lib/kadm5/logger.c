@@ -310,7 +310,7 @@ krb5_klog_init(krb5_context kcontext, char *ename, char *whoami, krb5_boolean do
                      */
                     append = (cp[4] == ':') ? O_APPEND : 0;
                     if (append || cp[4] == '=') {
-                        fd = open(&cp[5], O_CREAT | O_WRONLY | append,
+                        fd = THREEPARAMOPEN(&cp[5], O_CREAT | O_WRONLY | append,
                                   S_IRUSR | S_IWUSR | S_IRGRP);
                         if (fd != -1)
                             f = fdopen(fd, append ? "a" : "w");
@@ -777,7 +777,7 @@ krb5_klog_reopen(krb5_context kcontext)
              * In case the old logfile did not get moved out of the
              * way, open for append to prevent squashing the old logs.
              */
-            f = fopen(log_control.log_entries[lindex].lfu_fname, "a+");
+            f = WRITABLEFOPEN(log_control.log_entries[lindex].lfu_fname, "a+");
             if (f) {
                 set_cloexec_file(f);
                 log_control.log_entries[lindex].lfu_filep = f;
