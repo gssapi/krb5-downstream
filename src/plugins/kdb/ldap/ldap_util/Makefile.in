@@ -20,10 +20,10 @@ $(PROG): $(OBJS) $(KADMSRV_DEPLIBS) $(KRB5_BASE_DEPLIB) $(GETDATE)
 getdate.c: $(GETDATE)
 	$(RM) getdate.c y.tab.c
 	$(YACC) $(GETDATE)
-	$(MV) y.tab.c getdate.c
+	$(CP) y.tab.c getdate.c
 
 install:
 	$(INSTALL_PROGRAM) $(PROG) ${DESTDIR}$(ADMIN_BINDIR)/$(PROG)
 
 clean:
-	$(RM) $(PROG) $(OBJS) getdate.c
+	$(RM) $(PROG) $(OBJS) getdate.c y.tab.c
