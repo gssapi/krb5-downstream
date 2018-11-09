@@ -169,13 +169,14 @@ krad_attrset_copy(const krad_attrset *set, krad_attrset **copy)
 static krb5_error_code
 append_attr(krb5_context ctx, const char *secret,
             const uint8_t *auth, krad_attr type, const krb5_data *data,
-            uint8_t outbuf[MAX_ATTRSETSIZE], size_t *i)
+            uint8_t outbuf[MAX_ATTRSETSIZE], size_t *i, krb5_boolean *is_fips)
 {
     uint8_t buffer[MAX_ATTRSIZE];
     size_t attrlen;
     krb5_error_code retval;
 
-    retval = kr_attr_encode(ctx, secret, auth, type, data, buffer, &attrlen);
+    retval = kr_attr_encode(ctx, secret, auth, type, data, buffer, &attrlen,
+                            is_fips);
     if (retval)
         return retval;
 
@@ -193,7 +194,8 @@ append_attr(krb5_context ctx, const char *secret,
 krb5_error_code
 kr_attrset_encode(const krad_attrset *set, const char *secret,
                   const uint8_t *auth, krb5_boolean add_msgauth,
-                  unsigned char outbuf[MAX_ATTRSETSIZE], size_t *outlen)
+                  unsigned char outbuf[MAX_ATTRSETSIZE], size_t *outlen,
+                  krb5_boolean *is_fips)
 {
     krb5_error_code retval;
     const uint8_t zeroes[MD5_DIGEST_SIZE] = { 0 };
@@ -212,14 +214,14 @@ kr_attrset_encode(const krad_attrset *set, const char *secret,
         zerodata = make_data((uint8_t *)zeroes, MD5_DIGEST_SIZE);
         retval = append_attr(set->ctx, secret, auth,
                              KRAD_ATTR_MESSAGE_AUTHENTICATOR, &zerodata,
-                             outbuf, &i);
+                             outbuf, &i, is_fips);
         if (retval)
             return retval;
     }
 
     K5_TAILQ_FOREACH(a, &set->list, list) {
         retval = append_attr(set->ctx, secret, auth, a->type, &a->attr,
-                             outbuf, &i);
+                             outbuf, &i, is_fips);
         if (retval)
             return retval;
     }

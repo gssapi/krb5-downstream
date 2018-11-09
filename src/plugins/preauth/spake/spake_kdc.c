@@ -41,6 +41,8 @@
 
 #include <krb5/kdcpreauth_plugin.h>
 
+#include <openssl/evp.h>
+
 /*
  * The SPAKE kdcpreauth module uses a secure cookie containing the following
  * concatenated fields (all integer fields are big-endian):
@@ -551,6 +553,10 @@ kdcpreauth_spake_initvt(krb5_context context, int maj_ver, int min_ver,
 
     if (maj_ver != 1)
         return KRB5_PLUGIN_VER_NOTSUPP;
+
+    if (EVP_default_properties_is_fips_enabled(NULL))
+        return KRB5_CRYPTO_INTERNAL;
+
     vt = (krb5_kdcpreauth_vtable)vtable;
     vt->name = "spake";
     vt->pa_type_list = pa_types;

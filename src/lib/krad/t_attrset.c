@@ -49,6 +49,7 @@ main(void)
     krb5_context ctx;
     size_t len = 0, encode_len;
     krb5_data tmp;
+    krb5_boolean is_fips = FALSE;
 
     noerror(krb5_init_context(&ctx));
     noerror(krad_attrset_new(ctx, &set));
@@ -62,7 +63,8 @@ main(void)
     noerror(krad_attrset_add(set, KRAD_ATTR_USER_PASSWORD, &tmp));
 
     /* Encode attrset. */
-    noerror(kr_attrset_encode(set, "foo", auth, FALSE, buffer, &encode_len));
+    noerror(kr_attrset_encode(set, "foo", auth, FALSE, buffer, &encode_len,
+                              &is_fips));
     krad_attrset_free(set);
 
     /* Manually encode User-Name. */

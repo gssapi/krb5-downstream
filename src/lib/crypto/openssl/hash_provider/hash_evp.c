@@ -60,6 +60,11 @@ hash_evp(const EVP_MD *type, const krb5_crypto_iov *data, size_t num_data,
     if (ctx == NULL)
         return ENOMEM;
 
+    if (type == EVP_md4() || type == EVP_md5()) {
+        /* See comments below in hash_md4() and hash_md5(). */
+        EVP_MD_CTX_set_flags(ctx, EVP_MD_CTX_FLAG_NON_FIPS_ALLOW);
+    }
+
     ok = EVP_DigestInit_ex(ctx, type, NULL);
     for (i = 0; i < num_data; i++) {
         if (!SIGN_IOV(&data[i]))
@@ -78,6 +83,11 @@ hash_evp(const EVP_MD *type, const krb5_crypto_iov *data, size_t num_data,
 static krb5_error_code
 hash_md4(const krb5_crypto_iov *data, size_t num_data, krb5_data *output)
 {
+    /*
+     * MD4 is needed in FIPS mode to perform key generation for RC4 keys used
+     * by IPA.  These keys are only used along a (separately) secured channel
+     * for legacy reasons when performing trusts to Active Directory.
+     */
     return hash_evp(EVP_md4(), data, num_data, output);
 }
 
@@ -90,6 +100,8 @@ const struct krb5_hash_provider krb5int_hash_md4 = {
 static krb5_error_code
 hash_md5(const krb5_crypto_iov *data, size_t num_data, krb5_data *output)
 {
+    /* MD5 is needed in FIPS mode for communication with RADIUS servers.  This
+     * is gated in libkrad by libdefaults->radius_md5_fips_override. */
     return hash_evp(EVP_md5(), data, num_data, output);
 }
 

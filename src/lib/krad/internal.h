@@ -39,6 +39,8 @@
 #include <sys/socket.h>
 #include <netdb.h>
 
+#include <openssl/evp.h>
+
 #ifndef UCHAR_MAX
 #define UCHAR_MAX 255
 #endif
@@ -51,6 +53,13 @@
 
 typedef struct krad_remote_st krad_remote;
 
+struct krad_packet_st {
+    char buffer[KRAD_PACKET_SIZE_MAX];
+    krad_attrset *attrset;
+    krb5_data pkt;
+    krb5_boolean is_fips;
+};
+
 /* Validate constraints of an attribute. */
 krb5_error_code
 kr_attr_valid(krad_attr type, const krb5_data *data);
@@ -59,7 +68,8 @@ kr_attr_valid(krad_attr type, const krb5_data *data);
 krb5_error_code
 kr_attr_encode(krb5_context ctx, const char *secret, const unsigned char *auth,
                krad_attr type, const krb5_data *in,
-               unsigned char outbuf[MAX_ATTRSIZE], size_t *outlen);
+               unsigned char outbuf[MAX_ATTRSIZE], size_t *outlen,
+               krb5_boolean *is_fips);
 
 /* Decode an attribute. */
 krb5_error_code
@@ -68,11 +78,13 @@ kr_attr_decode(krb5_context ctx, const char *secret, const unsigned char *auth,
                unsigned char outbuf[MAX_ATTRSIZE], size_t *outlen);
 
 /* Encode set into outbuf.  If add_msgauth is true, include a zeroed
- * Message-Authenticator as the first attribute. */
+ * Message-Authenticator as the first attribute.  If is_fips is non-NULL and
+ * FIPS mode is active, *is_fips will be set to TRUE if MD5 was skipped. */
 krb5_error_code
 kr_attrset_encode(const krad_attrset *set, const char *secret,
                   const uint8_t *auth, krb5_boolean add_msgauth,
-                  unsigned char outbuf[MAX_ATTRSETSIZE], size_t *outlen);
+                  unsigned char outbuf[MAX_ATTRSETSIZE], size_t *outlen,
+                  krb5_boolean *is_fips);
 
 /* Decode attributes from a buffer. */
 krb5_error_code
@@ -157,6 +169,19 @@ gai_error_code(int err)
     default:
         return EINVAL;
     }
+}
+
+static inline krb5_boolean
+kr_use_fips(krb5_context ctx)
+{
+    int val = 0;
+
+    if (!EVP_default_properties_is_fips_enabled(NULL))
+        return 0;
+
+    (void)profile_get_boolean(ctx->profile, "libdefaults",
+                              "radius_md5_fips_override", NULL, 0, &val);
+    return !val;
 }
 
 #endif /* INTERNAL_H_ */

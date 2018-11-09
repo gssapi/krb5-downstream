@@ -387,6 +387,9 @@ krb5int_camellia_cbc_mac(krb5_key key, const krb5_crypto_iov *data,
     unsigned char blockY[CAMELLIA_BLOCK_SIZE], blockB[CAMELLIA_BLOCK_SIZE];
     struct iov_cursor cursor;
 
+    if (EVP_default_properties_is_fips_enabled(NULL))
+        return KRB5_CRYPTO_INTERNAL;
+
     if (output->length < CAMELLIA_BLOCK_SIZE)
         return KRB5_BAD_MSIZE;
 
@@ -418,6 +421,9 @@ static krb5_error_code
 krb5int_camellia_init_state (const krb5_keyblock *key, krb5_keyusage usage,
                              krb5_data *state)
 {
+    if (EVP_default_properties_is_fips_enabled(NULL))
+        return KRB5_CRYPTO_INTERNAL;
+
     state->length = 16;
     state->data = (void *) malloc(16);
     if (state->data == NULL)

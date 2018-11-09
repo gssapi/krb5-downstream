@@ -38,7 +38,8 @@
 typedef krb5_error_code
 (*attribute_transform_fn)(krb5_context ctx, const char *secret,
                           const unsigned char *auth, const krb5_data *in,
-                          unsigned char outbuf[MAX_ATTRSIZE], size_t *outlen);
+                          unsigned char outbuf[MAX_ATTRSIZE], size_t *outlen,
+                          krb5_boolean *is_fips);
 
 typedef struct {
     const char *name;
@@ -51,12 +52,14 @@ typedef struct {
 static krb5_error_code
 user_password_encode(krb5_context ctx, const char *secret,
                      const unsigned char *auth, const krb5_data *in,
-                     unsigned char outbuf[MAX_ATTRSIZE], size_t *outlen);
+                     unsigned char outbuf[MAX_ATTRSIZE], size_t *outlen,
+                     krb5_boolean *is_fips);
 
 static krb5_error_code
 user_password_decode(krb5_context ctx, const char *secret,
                      const unsigned char *auth, const krb5_data *in,
-                     unsigned char outbuf[MAX_ATTRSIZE], size_t *outlen);
+                     unsigned char outbuf[MAX_ATTRSIZE], size_t *outlen,
+                     krb5_boolean *ignored);
 
 static const attribute_record attributes[UCHAR_MAX] = {
     {"User-Name", 1, MAX_ATTRSIZE, NULL, NULL},
@@ -145,7 +148,8 @@ static const attribute_record attributes[UCHAR_MAX] = {
 static krb5_error_code
 user_password_encode(krb5_context ctx, const char *secret,
                      const unsigned char *auth, const krb5_data *in,
-                     unsigned char outbuf[MAX_ATTRSIZE], size_t *outlen)
+                     unsigned char outbuf[MAX_ATTRSIZE], size_t *outlen,
+                     krb5_boolean *is_fips)
 {
     const unsigned char *indx;
     krb5_error_code retval;
@@ -171,8 +175,15 @@ user_password_encode(krb5_context ctx, const char *secret,
     for (blck = 0, indx = auth; blck * BLOCKSIZE < len; blck++) {
         memcpy(tmp.data + seclen, indx, BLOCKSIZE);
 
-        retval = krb5_c_make_checksum(ctx, CKSUMTYPE_RSA_MD5, NULL, 0, &tmp,
-                                      &sum);
+        if (kr_use_fips(ctx)) {
+            /* Skip encryption here.  Taint so that we won't pass it out of
+             * the machine by accident. */
+            *is_fips = TRUE;
+            sum.contents = calloc(1, BLOCKSIZE);
+        } else {
+            retval = krb5_c_make_checksum(ctx, CKSUMTYPE_RSA_MD5, NULL, 0, &tmp,
+                                          &sum);
+        }
         if (retval != 0) {
             zap(tmp.data, tmp.length);
             zap(outbuf, len);
@@ -197,7 +208,8 @@ user_password_encode(krb5_context ctx, const char *secret,
 static krb5_error_code
 user_password_decode(krb5_context ctx, const char *secret,
                      const unsigned char *auth, const krb5_data *in,
-                     unsigned char outbuf[MAX_ATTRSIZE], size_t *outlen)
+                     unsigned char outbuf[MAX_ATTRSIZE], size_t *outlen,
+                     krb5_boolean *is_fips)
 {
     const unsigned char *indx;
     krb5_error_code retval;
@@ -221,8 +233,15 @@ user_password_decode(krb5_context ctx, const char *secret,
     for (blck = 0, indx = auth; blck * BLOCKSIZE < in->length; blck++) {
         memcpy(tmp.data + seclen, indx, BLOCKSIZE);
 
-        retval = krb5_c_make_checksum(ctx, CKSUMTYPE_RSA_MD5, NULL, 0,
-                                      &tmp, &sum);
+        if (kr_use_fips(ctx)) {
+            /* Skip encryption here.  Taint so that we won't pass it out of
+             * the machine by accident. */
+            *is_fips = TRUE;
+            sum.contents = calloc(1, BLOCKSIZE);
+        } else {
+            retval = krb5_c_make_checksum(ctx, CKSUMTYPE_RSA_MD5, NULL, 0,
+                                          &tmp, &sum);
+        }
         if (retval != 0) {
             zap(tmp.data, tmp.length);
             zap(outbuf, in->length);
@@ -265,7 +284,7 @@ krb5_error_code
 kr_attr_encode(krb5_context ctx, const char *secret,
                const unsigned char *auth, krad_attr type,
                const krb5_data *in, unsigned char outbuf[MAX_ATTRSIZE],
-               size_t *outlen)
+               size_t *outlen, krb5_boolean *is_fips)
 {
     krb5_error_code retval;
 
@@ -282,7 +301,8 @@ kr_attr_encode(krb5_context ctx, const char *secret,
         return 0;
     }
 
-    return attributes[type - 1].encode(ctx, secret, auth, in, outbuf, outlen);
+    return attributes[type - 1].encode(ctx, secret, auth, in, outbuf, outlen,
+                                       is_fips);
 }
 
 krb5_error_code
@@ -291,6 +311,7 @@ kr_attr_decode(krb5_context ctx, const char *secret, const unsigned char *auth,
                unsigned char outbuf[MAX_ATTRSIZE], size_t *outlen)
 {
     krb5_error_code retval;
+    krb5_boolean ignored;
 
     retval = kr_attr_valid(type, in);
     if (retval != 0)
@@ -305,7 +326,8 @@ kr_attr_decode(krb5_context ctx, const char *secret, const unsigned char *auth,
         return 0;
     }
 
-    return attributes[type - 1].decode(ctx, secret, auth, in, outbuf, outlen);
+    return attributes[type - 1].decode(ctx, secret, auth, in, outbuf, outlen,
+                                       &ignored);
 }
 
 krad_attr

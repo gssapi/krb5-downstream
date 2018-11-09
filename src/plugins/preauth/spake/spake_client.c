@@ -38,6 +38,8 @@
 #include "groups.h"
 #include <krb5/clpreauth_plugin.h>
 
+#include <openssl/evp.h>
+
 typedef struct reqstate_st {
     krb5_pa_spake *msg;         /* set in prep_questions, used in process */
     krb5_keyblock *initial_key;
@@ -375,6 +377,10 @@ clpreauth_spake_initvt(krb5_context context, int maj_ver, int min_ver,
 
     if (maj_ver != 1)
         return KRB5_PLUGIN_VER_NOTSUPP;
+
+    if (EVP_default_properties_is_fips_enabled(NULL))
+        return KRB5_CRYPTO_INTERNAL;
+
     vt = (krb5_clpreauth_vtable)vtable;
     vt->name = "spake";
     vt->pa_type_list = pa_types;
