@@ -352,6 +352,12 @@ The libdefaults section may contain any of the following relations:
     qualification of shortnames, set this relation to the empty string
     with ``qualify_shortname = ""``.  (New in release 1.18.)
 
+**radius_md5_fips_override**
+    Downstream-only option to enable use of MD5 in RADIUS
+    communication (libkrad).  This allows for local (or protected
+    tunnel) communication with a RADIUS server that doesn't use krad
+    (e.g., freeradius) while in FIPS mode.
+
 **rdns**
     If this flag is true, reverse name lookup will be used in addition
     to forward name lookup to canonicalizing hostnames for use in

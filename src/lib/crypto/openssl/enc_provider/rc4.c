@@ -69,6 +69,9 @@ k5_arcfour_docrypt(krb5_key key, const krb5_data *state, krb5_crypto_iov *data,
     EVP_CIPHER_CTX *ctx = NULL;
     struct arcfour_state *arcstate;
 
+    if (EVP_default_properties_is_fips_enabled(NULL))
+        return KRB5_CRYPTO_INTERNAL;
+
     arcstate = (state != NULL) ? (void *)state->data : NULL;
     if (arcstate != NULL) {
         ctx = arcstate->ctx;
@@ -116,7 +119,12 @@ k5_arcfour_docrypt(krb5_key key, const krb5_data *state, krb5_crypto_iov *data,
 static void
 k5_arcfour_free_state(krb5_data *state)
 {
-    struct arcfour_state *arcstate = (void *)state->data;
+    struct arcfour_state *arcstate;
+
+    if (EVP_default_properties_is_fips_enabled(NULL))
+        return;
+
+    arcstate = (void *) state->data;
 
     EVP_CIPHER_CTX_free(arcstate->ctx);
     free(arcstate);
@@ -127,6 +135,9 @@ k5_arcfour_init_state(const krb5_keyblock *key,
                       krb5_keyusage keyusage, krb5_data *new_state)
 {
     struct arcfour_state *arcstate;
+
+    if (EVP_default_properties_is_fips_enabled(NULL))
+        return KRB5_CRYPTO_INTERNAL;
 
     /*
      * The cipher state here is a saved pointer to a struct arcfour_state

@@ -50,6 +50,7 @@ main(void)
     const char *tmp;
     krb5_data in;
     size_t len;
+    krb5_boolean is_fips = FALSE;
 
     noerror(krb5_init_context(&ctx));
 
@@ -71,7 +72,7 @@ main(void)
     /* Test encoding. */
     in = string2data((char *)decoded);
     retval = kr_attr_encode(ctx, secret, auth, KRAD_ATTR_USER_PASSWORD,
-                            &in, outbuf, &len);
+                            &in, outbuf, &len, &is_fips);
     insist(retval == 0);
     insist(len == sizeof(encoded));
     insist(memcmp(outbuf, encoded, len) == 0);

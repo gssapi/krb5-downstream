@@ -263,7 +263,7 @@ on_io_write(krad_remote *rr)
     request *r;
 
     K5_TAILQ_FOREACH(r, &rr->list, list) {
-        tmp = krad_packet_encode(r->request);
+        tmp = &r->request->pkt;
 
         /* If the packet has already been sent, do nothing. */
         if (r->sent == tmp->length)
@@ -358,7 +358,7 @@ on_io_read(krad_remote *rr)
     if (req != NULL) {
         K5_TAILQ_FOREACH(r, &rr->list, list) {
             if (r->request == req &&
-                r->sent == krad_packet_encode(req)->length) {
+                r->sent == req->pkt.length) {
                 request_finish(r, 0, rsp);
                 break;
             }
@@ -459,6 +459,12 @@ kr_remote_send(krad_remote *rr, krad_code code, krad_attrset *attrs,
                                      iterator, &r, &tmp);
     if (retval != 0)
         goto error;
+    else if (tmp->is_fips && rr->info->ai_family != AF_LOCAL &&
+        rr->info->ai_family != AF_UNIX) {
+        /* This would expose cleartext passwords, so abort. */
+        retval = ESOCKTNOSUPPORT;
+        goto error;
+    }
 
     K5_TAILQ_FOREACH(r, &rr->list, list) {
         if (r->request == tmp) {

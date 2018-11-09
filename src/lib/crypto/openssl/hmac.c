@@ -111,7 +111,11 @@ map_digest(const struct krb5_hash_provider *hash)
         return EVP_sha256();
     else if (hash == &krb5int_hash_sha384)
         return EVP_sha384();
-    else if (hash == &krb5int_hash_md5)
+
+    if (EVP_default_properties_is_fips_enabled(NULL))
+        return NULL;
+
+    if (hash == &krb5int_hash_md5)
         return EVP_md5();
     else if (hash == &krb5int_hash_md4)
         return EVP_md4();

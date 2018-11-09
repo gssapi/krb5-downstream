@@ -26,6 +26,9 @@
 
 #include "crypto_int.h"
 
+#include <openssl/evp.h>
+#include <openssl/rand.h>
+
 krb5_error_code KRB5_CALLCONV
 krb5_c_random_seed(krb5_context context, krb5_data *data)
 {
@@ -99,10 +102,22 @@ cleanup:
 static krb5_boolean
 get_os_entropy(unsigned char *buf, size_t len)
 {
-#if defined(HAVE_GETENTROPY)
     int r;
+#if defined(HAVE_GETENTROPY)
     size_t seg;
+#endif
 
+    /*
+     * In FIPS mode, use OpenSSL's FIPS-validated DRBG via RAND_bytes()
+     * instead of OS entropy sources.  This ensures all random number
+     * generation goes through the FIPS-approved mechanism.
+     */
+    if (EVP_default_properties_is_fips_enabled(NULL)) {
+        r = RAND_bytes(buf, len);
+        return r == 1;
+    }
+
+#if defined(HAVE_GETENTROPY)
     /* getentropy() has a maximum length of 256. */
     while (len > 0) {
         seg = (len > 256) ? 256 : len;
@@ -121,8 +136,6 @@ get_os_entropy(unsigned char *buf, size_t len)
      * is far in the past, along with the conditional include of
      * <sys/syscall.h> above.
      */
-    int r;
-
     while (len > 0) {
         /*
          * Pull from the /dev/urandom pool, but require it to have been seeded.
