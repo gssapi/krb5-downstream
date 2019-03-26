@@ -56,7 +56,7 @@ kg_verify_mic_v1(krb5_context context, OM_uint32 *minor_status,
     signalg = k5_input_get_uint16_le(in);
     filler = k5_input_get_uint32_le(in);
     seqbytes = k5_input_get_bytes(in, 8);
-    cksum_len = (signalg == SGN_ALG_HMAC_SHA1_DES3_KD) ? 20 : 8;
+    cksum_len = 8;
     cksum = k5_input_get_bytes(in, cksum_len);
 
     if (in->status || in->len != 0 || toktype != exp_toktype ||

@@ -73,11 +73,10 @@ credential verification failed: KDC has no support for encryption type
 ......................................................................
 
 This most commonly happens when trying to use a principal with only
-DES keys, in a release (MIT krb5 1.7 or later) which disables DES by
-default.  DES encryption is considered weak due to its inadequate key
-size.  If you cannot migrate away from its use, you can re-enable DES
-by adding ``allow_weak_crypto = true`` to the :ref:`libdefaults`
-section of :ref:`krb5.conf(5)`.
+DES/3DES keys, in a release (MIT krb5 1.7 or later) which disables DES
+by default.  DES encryption is considered weak due to its inadequate
+key size and has been removed upstream; 3DES is not recommended, and
+has been removed downstream by rharwood@redhat.com.
 
 
 .. _err_cert_chain_cert_expired:

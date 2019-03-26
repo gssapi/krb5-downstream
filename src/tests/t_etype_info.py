@@ -1,7 +1,7 @@
 from k5test import *
 
-supported_enctypes = 'aes128-cts des3-cbc-sha1 rc4-hmac'
-conf = {'libdefaults': {'allow_des3': 'true', 'allow_rc4': 'true'},
+supported_enctypes = 'aes128-cts rc4-hmac'
+conf = {'libdefaults': {'allow_rc4': 'true'},
         'realms': {'$realm': {'supported_enctypes': supported_enctypes}}}
 realm = K5Realm(create_host=False, get_creds=False, krb5_conf=conf)
 
@@ -26,9 +26,9 @@ def test_etinfo(princ, enctypes, expected_lines):
 # With no newer enctypes in the request, PA-ETYPE-INFO2,
 # PA-ETYPE-INFO, and PA-PW-SALT appear in the AS-REP, each listing one
 # key for the most preferred matching enctype.
-test_etinfo('user', 'rc4-hmac-exp des3 rc4',
-            ['asrep etype_info2 des3-cbc-sha1 KRBTEST.COMuser',
-             'asrep etype_info des3-cbc-sha1 KRBTEST.COMuser',
+test_etinfo('user', 'rc4-hmac-exp rc4',
+            ['asrep etype_info2 rc4-hmac KRBTEST.COMuser',
+             'asrep etype_info rc4-hmac KRBTEST.COMuser',
              'asrep pw_salt KRBTEST.COMuser'])
 
 # With a newer enctype in the request (even if it is not the most
@@ -39,9 +39,9 @@ test_etinfo('user', 'rc4 aes256-cts',
 
 # In preauth-required errors, PA-PW-SALT does not appear, but the same
 # etype-info2 values are expected.
-test_etinfo('preauthuser', 'rc4-hmac-exp des3 rc4',
-            ['error etype_info2 des3-cbc-sha1 KRBTEST.COMpreauthuser',
-             'error etype_info des3-cbc-sha1 KRBTEST.COMpreauthuser'])
+test_etinfo('preauthuser', 'rc4-hmac-exp rc4',
+            ['error etype_info2 rc4-hmac KRBTEST.COMpreauthuser',
+             'error etype_info rc4-hmac KRBTEST.COMpreauthuser'])
 test_etinfo('preauthuser', 'rc4 aes256-cts',
             ['error etype_info2 rc4-hmac KRBTEST.COMpreauthuser'])
 
@@ -50,8 +50,8 @@ test_etinfo('preauthuser', 'rc4 aes256-cts',
 # (to allow for preauth mechs which don't depend on long-term keys).
 # An AS-REP cannot be generated without preauth as there is no reply
 # key.
-test_etinfo('rc4user', 'des3', [])
-test_etinfo('nokeyuser', 'des3', [])
+test_etinfo('rc4user', 'aes128-cts', [])
+test_etinfo('nokeyuser', 'aes128-cts', [])
 
 # Verify that etype-info2 is included in a MORE_PREAUTH_DATA_REQUIRED
 # error if the client does optimistic preauth.

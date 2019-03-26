@@ -38,9 +38,9 @@ realm.run([klist, '-e'], expected_msg=msg)
 
 # Test that the KDC only accepts the first enctype for a kvno, for a
 # local-realm TGS request.  To set this up, we abuse an edge-case
-# behavior of modprinc -kvno.  First, set up a DES3 krbtgt entry at
+# behavior of modprinc -kvno.  First, set up an aes128-sha2 krbtgt entry at
 # kvno 1 and cache a krbtgt ticket.
-realm.run([kadminl, 'cpw', '-randkey', '-e', 'des3-cbc-sha1',
+realm.run([kadminl, 'cpw', '-randkey', '-e', 'aes128-cts-hmac-sha256-128',
            realm.krbtgt_princ])
 realm.run([kadminl, 'modprinc', '-kvno', '1', realm.krbtgt_princ])
 realm.kinit(realm.user_princ, password('user'))
@@ -51,9 +51,9 @@ realm.run([kadminl, 'cpw', '-randkey', '-keepold', '-e', 'aes256-cts',
 realm.run([kadminl, 'modprinc', '-kvno', '1', realm.krbtgt_princ])
 out = realm.run([kadminl, 'getprinc', realm.krbtgt_princ])
 if 'vno 1, aes256-cts' not in out or \
-   'vno 1, DEPRECATED:des3-cbc-sha1' not in out:
+   'vno 1, aes128-cts-hmac-sha256-128' not in out:
     fail('keyrollover: setup for TGS enctype test failed')
-# Now present the DES3 ticket to the KDC and make sure it's rejected.
+# Now present the aes128-sha2 ticket to the KDC and make sure it's rejected.
 realm.run([kvno, realm.host_princ], expected_code=1)
 
 # Test -keepold limit for self-service requests through kadmind.

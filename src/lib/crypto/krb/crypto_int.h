@@ -335,8 +335,6 @@ krb5_error_code krb5int_aes2_string_to_key(const struct krb5_keytypes *enc,
 /* Random to key */
 krb5_error_code k5_rand2key_direct(const krb5_data *randombits,
                                    krb5_keyblock *keyblock);
-krb5_error_code k5_rand2key_des3(const krb5_data *randombits,
-                                 krb5_keyblock *keyblock);
 
 /* Pseudo-random function */
 krb5_error_code krb5int_des_prf(const struct krb5_keytypes *ktp,
@@ -414,11 +412,6 @@ krb5_keyusage krb5int_arcfour_translate_usage(krb5_keyusage usage);
 /* Ensure library initialization has occurred. */
 int krb5int_crypto_init(void);
 
-/* DES default state initialization handler (used by module enc providers). */
-krb5_error_code krb5int_des_init_state(const krb5_keyblock *key,
-                                       krb5_keyusage keyusage,
-                                       krb5_data *state_out);
-
 /* Default state cleanup handler (used by module enc providers). */
 void krb5int_default_free_state(krb5_data *state);
 
@@ -471,7 +464,6 @@ void k5_iov_cursor_put(struct iov_cursor *cursor, unsigned char *block);
 /* Modules must implement the k5_sha256() function prototyped in k5-int.h. */
 
 /* Modules must implement the following enc_providers and hash_providers: */
-extern const struct krb5_enc_provider krb5int_enc_des3;
 extern const struct krb5_enc_provider krb5int_enc_arcfour;
 extern const struct krb5_enc_provider krb5int_enc_aes128;
 extern const struct krb5_enc_provider krb5int_enc_aes256;
@@ -487,9 +479,6 @@ extern const struct krb5_hash_provider krb5int_hash_sha256;
 extern const struct krb5_hash_provider krb5int_hash_sha384;
 
 /* Modules must implement the following functions. */
-
-/* Set the parity bits to the correct values in keybits. */
-void k5_des_fixup_key_parity(unsigned char *keybits);
 
 /* Compute an HMAC using the provided hash function, key, and data, storing the
  * result into output (caller-allocated). */

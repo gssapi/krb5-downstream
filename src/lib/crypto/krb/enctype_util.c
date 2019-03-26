@@ -45,6 +45,9 @@ struct {
     { ENCTYPE_DES_CBC_MD5, "des-cbc-md5" },
     { ENCTYPE_DES_CBC_RAW, "des-cbc-raw" },
     { ENCTYPE_DES_HMAC_SHA1, "des-hmac-sha1" },
+    { ENCTYPE_DES3_CBC_SHA, "des3-cbc-sha1" },
+    { ENCTYPE_DES3_CBC_RAW, "des3-cbc-raw" },
+    { ENCTYPE_DES3_CBC_SHA1, "des3-hmac-sha1" },
     { ENCTYPE_NULL, NULL }
 };
 

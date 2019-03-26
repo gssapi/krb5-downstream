@@ -37,7 +37,7 @@ Database backends: LDAP, DB2, LMDB
 
 krb4 support: Kerberos 5 release < 1.8
 
-DES support: Kerberos 5 release < 1.18 (See :ref:`retiring-des`)
+DES/3DES support: Kerberos 5 release < 1.18 (See :ref:`retiring-des`)
 
 Interoperability
 ----------------
@@ -659,9 +659,8 @@ Release 1.21
 
 * Protocol evolution:
 
-  - The KDC will no longer issue tickets with RC4 or triple-DES
-    session keys unless explicitly configured with the new allow_rc4
-    or allow_des3 variables respectively.
+  - The KDC will no longer issue tickets with RC4 session keys unless
+    explicitly configured with the new allow_rc4 variable.
 
   - The KDC will assume that all services can handle aes256-sha1
     session keys unless the service principal has a session_enctypes

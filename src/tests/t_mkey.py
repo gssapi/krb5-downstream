@@ -7,7 +7,6 @@ import struct
 # default enctype for master keys.
 aes256 = 'aes256-cts-hmac-sha1-96'
 aes128 = 'aes128-cts-hmac-sha1-96'
-des3 = 'des3-cbc-sha1'
 defetype = aes256
 
 realm = K5Realm(create_host=False, start_kadmind=True)
@@ -299,40 +298,6 @@ if 'Decrypt integrity check failed' in out or 'added to keytab' not in out:
     fail('Preserved old key data not updated to new master key')
 
 realm.stop()
-
-# Load a dump file created with krb5 1.6, before the master key
-# rollover changes were introduced.  Write out an old-format stash
-# file consistent with the dump's master password ("footes").  The K/M
-# entry in this database will not have actkvno tl-data because it was
-# created prior to master key rollover support.  Verify that:
-# 1. We can access the database using the old-format stash file.
-# 2. list_mkeys displays the same list as for a post-1.7 KDB.
-mark('pre-1.7 stash file')
-dumpfile = os.path.join(srctop, 'tests', 'dumpfiles', 'dump.16')
-os.remove(stash_file)
-f = open(stash_file, 'wb')
-f.write(struct.pack('=HL24s', 16, 24,
-                    b'\xF8\x3E\xFB\xBA\x6D\x80\xD9\x54\xE5\x5D\xF2\xE0'
-                    b'\x94\xAD\x6D\x86\xB5\x16\x37\xEC\x7C\x8A\xBC\x86'))
-f.close()
-realm.run([kdb5_util, 'load', dumpfile])
-nprincs = len(realm.run([kadminl, 'listprincs']).splitlines())
-check_mkvno('K/M', 1)
-check_mkey_list((1, des3, True, True))
-
-# Create a new master key and verify that, without actkvkno tl-data:
-# 1. list_mkeys displays the same as for a post-1.7 KDB.
-# 2. update_princ_encryption still targets mkvno 1.
-# 3. libkadm5 still uses mkvno 1 for key changes.
-# 4. use_mkey creates the same list as for a post-1.7 KDB.
-mark('rollover from pre-1.7 KDB')
-add_mkey([])
-check_mkey_list((2, defetype, False, False), (1, des3, True, True))
-update_princ_encryption(False, 1, 0, nprincs - 1)
-realm.run([kadminl, 'addprinc', '-randkey', realm.user_princ])
-check_mkvno(realm.user_princ, 1)
-realm.run([kdb5_util, 'use_mkey', '2', 'now-1day'])
-check_mkey_list((2, defetype, True, True), (1, des3, True, False))
 
 # Regression test for #8395.  Purge the master key and verify that a
 # master key fetch does not segfault.

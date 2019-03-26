@@ -35,27 +35,6 @@
 
 /* Deprecations come from RFC 6649 and RFC 8249. */
 const struct krb5_keytypes krb5int_enctypes_list[] = {
-    { ENCTYPE_DES3_CBC_RAW,
-      "des3-cbc-raw", { 0 }, "Triple DES cbc mode raw",
-      &krb5int_enc_des3, NULL,
-      16,
-      krb5int_raw_crypto_length, krb5int_raw_encrypt, krb5int_raw_decrypt,
-      krb5int_dk_string_to_key, k5_rand2key_des3,
-      NULL, /*PRF*/
-      0,
-      ETYPE_WEAK | ETYPE_DEPRECATED, 112 },
-
-    { ENCTYPE_DES3_CBC_SHA1,
-      "des3-cbc-sha1", { "des3-hmac-sha1", "des3-cbc-sha1-kd" },
-      "Triple DES cbc mode with HMAC/sha1",
-      &krb5int_enc_des3, &krb5int_hash_sha1,
-      16,
-      krb5int_dk_crypto_length, krb5int_dk_encrypt, krb5int_dk_decrypt,
-      krb5int_dk_string_to_key, k5_rand2key_des3,
-      krb5int_dk_prf,
-      CKSUMTYPE_HMAC_SHA1_DES3,
-      ETYPE_DEPRECATED, 112 },
-
     /* rc4-hmac uses a 128-bit key, but due to weaknesses in the RC4 cipher, we
      * consider its strength degraded and assign it an SSF value of 64. */
     { ENCTYPE_ARCFOUR_HMAC,

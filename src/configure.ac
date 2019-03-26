@@ -1517,12 +1517,12 @@ V5_AC_OUTPUT_MAKEFILE(.
 	lib lib/kdb
 
 	lib/crypto lib/crypto/krb lib/crypto/crypto_tests
-	lib/crypto/builtin lib/crypto/builtin/des
+	lib/crypto/builtin
 	lib/crypto/builtin/aes lib/crypto/builtin/camellia
 	lib/crypto/builtin/md4 lib/crypto/builtin/md5
 	lib/crypto/builtin/sha1 lib/crypto/builtin/sha2
 	lib/crypto/builtin/enc_provider lib/crypto/builtin/hash_provider
-	lib/crypto/openssl lib/crypto/openssl/des
+	lib/crypto/openssl
 	lib/crypto/openssl/enc_provider lib/crypto/openssl/hash_provider
 
 	lib/krb5 lib/krb5/error_tables lib/krb5/asn.1 lib/krb5/ccache

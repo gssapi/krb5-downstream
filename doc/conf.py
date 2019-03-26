@@ -281,7 +281,7 @@ else:
     rst_epilog += '''
 .. |krb5conf| replace:: ``/etc/krb5.conf``
 .. |defkeysalts| replace:: ``aes256-cts-hmac-sha1-96:normal aes128-cts-hmac-sha1-96:normal``
-.. |defetypes| replace:: ``aes256-cts-hmac-sha1-96 aes128-cts-hmac-sha1-96 aes256-cts-hmac-sha384-192 aes128-cts-hmac-sha256-128 des3-cbc-sha1 arcfour-hmac-md5 camellia256-cts-cmac camellia128-cts-cmac``
+.. |defetypes| replace:: ``aes256-cts-hmac-sha1-96 aes128-cts-hmac-sha1-96 aes256-cts-hmac-sha384-192 aes128-cts-hmac-sha256-128 arcfour-hmac-md5 camellia256-cts-cmac camellia128-cts-cmac``
 .. |defmkey| replace:: ``aes256-cts-hmac-sha1-96``
 .. |copy| unicode:: U+000A9
 '''

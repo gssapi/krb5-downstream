@@ -1,6 +1,6 @@
 mydir=lib$(S)crypto$(S)builtin
 BUILDTOP=$(REL)..$(S)..$(S)..
-SUBDIRS=camellia des aes md4 md5 sha1 sha2 enc_provider hash_provider
+SUBDIRS=camellia aes md4 md5 sha1 sha2 enc_provider hash_provider
 LOCALINCLUDES=-I$(srcdir)/../krb $(CRYPTO_IMPL_CFLAGS)
 
 ##DOS##BUILDTOP = ..\..\..
@@ -25,7 +25,7 @@ SRCS=\
 	$(srcdir)/kdf.c		\
 	$(srcdir)/pbkdf2.c	
 
-SUBDIROBJLISTS= des/OBJS.ST md4/OBJS.ST 	\
+SUBDIROBJLISTS= md4/OBJS.ST	 	\
 		md5/OBJS.ST sha1/OBJS.ST sha2/OBJS.ST 	\
 		enc_provider/OBJS.ST 		\
 		hash_provider/OBJS.ST 		\

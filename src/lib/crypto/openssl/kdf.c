@@ -60,8 +60,6 @@ enc_name(const struct krb5_enc_provider *enc)
         return "AES-128-CBC";
     if (enc == &krb5int_enc_aes256)
         return "AES-256-CBC";
-    if (enc == &krb5int_enc_des3)
-        return "DES-EDE3-CBC";
     return NULL;
 }
 

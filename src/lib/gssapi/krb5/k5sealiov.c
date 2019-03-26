@@ -147,18 +147,11 @@ make_seal_token_v1_iov(krb5_context context,
     /* pad the plaintext, encrypt if needed, and stick it in the token */
 
     /* initialize the checksum */
-    switch (ctx->signalg) {
-    case SGN_ALG_HMAC_SHA1_DES3_KD:
-        md5cksum.checksum_type = CKSUMTYPE_HMAC_SHA1_DES3;
-        break;
-    case SGN_ALG_HMAC_MD5:
-        md5cksum.checksum_type = CKSUMTYPE_HMAC_MD5_ARCFOUR;
-        if (toktype != KG_TOK_WRAP_MSG)
-            sign_usage = 15;
-        break;
-    default:
-        abort ();
-    }
+    if (ctx->signalg != SGN_ALG_HMAC_MD5)
+        abort();
+    md5cksum.checksum_type = CKSUMTYPE_HMAC_MD5_ARCFOUR;
+    if (toktype != KG_TOK_WRAP_MSG)
+        sign_usage = 15;
 
     code = krb5_c_checksum_length(context, md5cksum.checksum_type, &k5_trailerlen);
     if (code != 0)
@@ -182,15 +175,7 @@ make_seal_token_v1_iov(krb5_context context,
     if (code != 0)
         goto cleanup;
 
-    switch (ctx->signalg) {
-    case SGN_ALG_HMAC_SHA1_DES3_KD:
-        assert(md5cksum.length == ctx->cksum_size);
-        memcpy(checksum, md5cksum.contents, md5cksum.length);
-        break;
-    case SGN_ALG_HMAC_MD5:
-        memcpy(checksum, md5cksum.contents, ctx->cksum_size);
-        break;
-    }
+    memcpy(checksum, md5cksum.contents, ctx->cksum_size);
 
     /* create the seq_num */
     code = kg_make_seq_num(context, ctx->seq, ctx->initiate ? 0 : 0xFF,

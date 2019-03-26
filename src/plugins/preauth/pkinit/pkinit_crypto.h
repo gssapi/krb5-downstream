@@ -316,11 +316,11 @@ krb5_error_code server_process_dh
  * krb5_algorithm_identifier
  */
 krb5_error_code create_krb5_supportedCMSTypes
-	(krb5_context context,				/* IN */
-	pkinit_plg_crypto_context plg_cryptoctx,	/* IN */
-	pkinit_req_crypto_context req_cryptoctx,	/* IN */
-	pkinit_identity_crypto_context id_cryptoctx,	/* IN */
-	krb5_algorithm_identifier ***supportedCMSTypes); /* OUT */
+       (krb5_context context,                          /* IN */
+       pkinit_plg_crypto_context plg_cryptoctx,        /* IN */
+       pkinit_req_crypto_context req_cryptoctx,        /* IN */
+       pkinit_identity_crypto_context id_cryptoctx,    /* IN */
+       krb5_algorithm_identifier ***supportedCMSTypes); /* OUT */
 
 /*
  * this functions takes in crypto specific representation of

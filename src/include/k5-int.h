@@ -180,7 +180,6 @@ typedef unsigned char   u_char;
  * matches the variable name.  Keep these alphabetized. */
 #define KRB5_CONF_ACL_FILE                     "acl_file"
 #define KRB5_CONF_ADMIN_SERVER                 "admin_server"
-#define KRB5_CONF_ALLOW_DES3                   "allow_des3"
 #define KRB5_CONF_ALLOW_RC4                    "allow_rc4"
 #define KRB5_CONF_ALLOW_WEAK_CRYPTO            "allow_weak_crypto"
 #define KRB5_CONF_AUTH_TO_LOCAL                "auth_to_local"
@@ -1245,7 +1244,6 @@ struct _krb5_context {
     struct _kdb_log_context *kdblog_context;
 
     krb5_boolean allow_weak_crypto;
-    krb5_boolean allow_des3;
     krb5_boolean allow_rc4;
     krb5_boolean ignore_acceptor_hostname;
     krb5_boolean enforce_ok_as_delegate;

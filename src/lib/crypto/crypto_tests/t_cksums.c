@@ -60,16 +60,6 @@ struct test {
           "\xAF\xD8\x07\x09" }
     },
     {
-        { KV5M_DATA, 9, "six seven" },
-        CKSUMTYPE_HMAC_SHA1_DES3, ENCTYPE_DES3_CBC_SHA1, 2,
-        { KV5M_DATA, 24,
-          "\x7A\x25\xDF\x89\x92\x29\x6D\xCE\xDA\x0E\x13\x5B\xC4\x04\x6E\x23"
-          "\x75\xB3\xC1\x4C\x98\xFB\xC1\x62" },
-        { KV5M_DATA, 20,
-          "\x0E\xEF\xC9\xC3\xE0\x49\xAA\xBC\x1B\xA5\xC4\x01\x67\x7D\x9A\xB6"
-          "\x99\x08\x2B\xB4" }
-    },
-    {
         { KV5M_DATA, 37, "eight nine ten eleven twelve thirteen" },
         CKSUMTYPE_HMAC_SHA1_96_AES128, ENCTYPE_AES128_CTS_HMAC_SHA1_96, 3,
         { KV5M_DATA, 16,

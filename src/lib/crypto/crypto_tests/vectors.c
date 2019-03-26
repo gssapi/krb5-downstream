@@ -190,8 +190,6 @@ test_s2k (krb5_enctype enctype)
     }
 }
 
-static void test_des3_s2k (void) { test_s2k (ENCTYPE_DES3_CBC_SHA1); }
-
 static void
 keyToData (krb5_keyblock *k, krb5_data *d)
 {
@@ -208,8 +206,6 @@ void check_error (int r, int line) {
 }
 #define CHECK check_error(r, __LINE__)
 
-extern struct krb5_enc_provider krb5int_enc_des3;
-struct krb5_enc_provider *enc = &krb5int_enc_des3;
 extern struct krb5_enc_provider krb5int_enc_aes128, krb5int_enc_aes256;
 
 void DK (krb5_keyblock *out, krb5_keyblock *in, const krb5_data *usage) {

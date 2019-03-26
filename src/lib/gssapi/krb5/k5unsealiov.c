@@ -103,27 +103,20 @@ kg_unseal_v1_iov(krb5_context context,
     }
 
     if ((ctx->sealalg == SEAL_ALG_NONE && signalg > 1) ||
-        (ctx->sealalg == SEAL_ALG_DES3KD &&
-         signalg != SGN_ALG_HMAC_SHA1_DES3_KD)||
         (ctx->sealalg == SEAL_ALG_MICROSOFT_RC4 &&
          signalg != SGN_ALG_HMAC_MD5)) {
         *minor_status = 0;
         return GSS_S_DEFECTIVE_TOKEN;
     }
 
-    switch (signalg) {
-    case SGN_ALG_HMAC_MD5:
-        cksum_len = 8;
-        if (toktype != KG_TOK_WRAP_MSG)
-            sign_usage = 15;
-        break;
-    case SGN_ALG_HMAC_SHA1_DES3_KD:
-        cksum_len = 20;
-        break;
-    default:
+    if (signalg != SGN_ALG_HMAC_MD5) {
         *minor_status = 0;
         return GSS_S_DEFECTIVE_TOKEN;
     }
+
+    cksum_len = 8;
+    if (toktype != KG_TOK_WRAP_MSG)
+        sign_usage = 15;
 
     /* get the token parameters */
     code = kg_get_seq_num(context, ctx->seq, ptr + 14, ptr + 6, &direction,
@@ -182,16 +175,10 @@ kg_unseal_v1_iov(krb5_context context,
 
     /* initialize the checksum */
 
-    switch (signalg) {
-    case SGN_ALG_HMAC_MD5:
-        md5cksum.checksum_type = CKSUMTYPE_HMAC_MD5_ARCFOUR;
-        break;
-    case SGN_ALG_HMAC_SHA1_DES3_KD:
-        md5cksum.checksum_type = CKSUMTYPE_HMAC_SHA1_DES3;
-        break;
-    default:
+    if (signalg != SGN_ALG_HMAC_MD5)
         abort();
-    }
+
+    md5cksum.checksum_type = CKSUMTYPE_HMAC_MD5_ARCFOUR;
 
     code = krb5_c_checksum_length(context, md5cksum.checksum_type, &sumlen);
     if (code != 0) {
@@ -210,18 +197,13 @@ kg_unseal_v1_iov(krb5_context context,
         goto cleanup;
     }
 
-    switch (signalg) {
-    case SGN_ALG_HMAC_SHA1_DES3_KD:
-    case SGN_ALG_HMAC_MD5:
-        code = k5_bcmp(md5cksum.contents, ptr + 14, cksum_len);
-        break;
-    default:
+    if (signalg != SGN_ALG_HMAC_MD5) {
         code = 0;
         retval = GSS_S_DEFECTIVE_TOKEN;
         goto cleanup;
-        break;
     }
 
+    code = k5_bcmp(md5cksum.contents, ptr + 14, cksum_len);
     if (code != 0) {
         code = 0;
         retval = GSS_S_BAD_SIG;

@@ -47,7 +47,6 @@ STLIBOBJS=\
 	prf.o			\
 	prf_aes2.o		\
 	prf_cmac.o		\
-	prf_des.o		\
 	prf_dk.o		\
 	prf_rc4.o		\
 	prng.o			\
@@ -103,7 +102,6 @@ OBJS=\
 	$(OUTPRE)prf.$(OBJEXT)			\
 	$(OUTPRE)prf_aes2.$(OBJEXT)		\
 	$(OUTPRE)prf_cmac.$(OBJEXT)		\
-	$(OUTPRE)prf_des.$(OBJEXT)		\
 	$(OUTPRE)prf_dk.$(OBJEXT)		\
 	$(OUTPRE)prf_rc4.$(OBJEXT)		\
 	$(OUTPRE)prng.$(OBJEXT)			\
@@ -159,7 +157,6 @@ SRCS=\
 	$(srcdir)/prf.c			\
 	$(srcdir)/prf_aes2.c		\
 	$(srcdir)/prf_cmac.c		\
-	$(srcdir)/prf_des.c		\
 	$(srcdir)/prf_dk.c		\
 	$(srcdir)/prf_rc4.c		\
 	$(srcdir)/prng.c 		\

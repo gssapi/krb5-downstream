@@ -16,13 +16,12 @@ def test_salt(realm, e1, salt, e2):
 
 # Enctype/salt pairs chosen with non-default salt types.
 # The enctypes are mostly arbitrary.
-salts = [('des3-cbc-sha1', 'norealm'),
+salts = [('aes128-cts-hmac-sha1-96', 'norealm'),
          ('arcfour-hmac', 'onlyrealm'),
          ('aes128-cts-hmac-sha1-96', 'special')]
 # These enctypes are chosen to cover the different string-to-key routines.
 # Omit ":normal" from aes256 to check that salttype defaulting works.
-second_kstypes = ['aes256-cts-hmac-sha1-96', 'arcfour-hmac:normal',
-                  'des3-cbc-sha1:normal']
+second_kstypes = ['aes256-cts-hmac-sha1-96', 'arcfour-hmac:normal']
 
 # Test using different salt types in a principal's key list.
 # Parameters from one key in the list must not leak over to later ones.

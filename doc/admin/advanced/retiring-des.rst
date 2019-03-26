@@ -10,6 +10,13 @@ ability have rendered DES vulnerable to brute force attacks on its 56-bit
 keyspace.  As such, it is now considered insecure and should not be
 used (:rfc:`6649`).
 
+In 1999, MIT krb5 added support for Triple-DES (3DES) encryption types.
+However, due to weakenings of DES and other security concerns, it is now also
+considered insecure and should not be used (:rfc:`8429`).  AES encryption
+types were added to MIT in 2003, meaning that the number of deployments with
+3DES as the strongest encryption type is hopefully small.  The rotation
+procedure described herein works for both DES and 3DES.
+
 History
 -------
 
@@ -26,6 +33,10 @@ MIT krb5 began flagging deprecated encryption types with release 1.17,
 and removed DES (single-DES) support in release 1.18.  As a
 consequence, a release prior to 1.18 is required to perform these
 migrations.
+
+3DES (a flagged deprecated encryption type) was also removed downstream by
+rharwood@redhat.com starting in 1.18; likewise, a pre-1.18 release is required
+to perform these migrations.
 
 Types of keys
 -------------
