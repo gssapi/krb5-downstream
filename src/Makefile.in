@@ -142,7 +142,7 @@ WINMAKEFILES=Makefile \
 	lib\Makefile lib\crypto\Makefile lib\crypto\krb\Makefile \
 	lib\crypto\builtin\Makefile lib\crypto\builtin\aes\Makefile \
 	lib\crypto\builtin\enc_provider\Makefile \
-	lib\crypto\builtin\des\Makefile lib\crypto\builtin\md5\Makefile \
+	lib\crypto\builtin\md5\Makefile \
 	lib\crypto\builtin\camellia\Makefile lib\crypto\builtin\md4\Makefile \
 	lib\crypto\builtin\hash_provider\Makefile \
 	lib\crypto\builtin\sha2\Makefile lib\crypto\builtin\sha1\Makefile \
@@ -213,8 +213,6 @@ WINMAKEFILES=Makefile \
 ##DOS##lib\crypto\builtin\aes\Makefile: lib\crypto\builtin\aes\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##lib\crypto\builtin\enc_provider\Makefile: lib\crypto\builtin\enc_provider\Makefile.in $(MKFDEP)
-##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##lib\crypto\builtin\des\Makefile: lib\crypto\builtin\des\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##lib\crypto\builtin\md5\Makefile: lib\crypto\builtin\md5\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@

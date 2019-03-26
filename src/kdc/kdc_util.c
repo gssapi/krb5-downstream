@@ -1099,8 +1099,6 @@ select_session_keytype(krb5_context context, krb5_db_entry *server,
          * unless they are explicitly allowed.  In the future they will be more
          * comprehensively disabled and eventually removed.
          */
-        if (ktype[i] == ENCTYPE_DES3_CBC_SHA1 && !context->allow_des3)
-            continue;
         if (ktype[i] == ENCTYPE_ARCFOUR_HMAC && !context->allow_rc4)
             continue;
 
@@ -1170,8 +1168,6 @@ enctype_name(krb5_enctype ktype, char *buf, size_t buflen)
         name = "rsaEncryption-EnvOID";
     else if (ktype == ENCTYPE_RSA_ES_OAEP_ENV)
         name = "id-RSAES-OAEP-EnvOID";
-    else if (ktype == ENCTYPE_DES3_CBC_ENV)
-        name = "des-ede3-cbc-EnvOID";
     else
         return krb5_enctype_to_name(ktype, FALSE, buf, buflen);
 
@@ -1663,8 +1659,6 @@ krb5_boolean
 enctype_requires_etype_info_2(krb5_enctype enctype)
 {
     switch(enctype) {
-    case ENCTYPE_DES3_CBC_SHA1:
-    case ENCTYPE_DES3_CBC_RAW:
     case ENCTYPE_ARCFOUR_HMAC:
     case ENCTYPE_ARCFOUR_HMAC_EXP :
         return 0;

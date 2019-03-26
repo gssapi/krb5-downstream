@@ -175,12 +175,6 @@ Additionally, krb5.conf may include any of the relations described in
 The libdefaults section may contain any of the following relations:
 .INDENT 0.0
 .TP
-\fBallow_des3\fP
-Permit the KDC to issue tickets with des3\-cbc\-sha1 session keys.
-In future releases, this flag will allow des3\-cbc\-sha1 to be used
-at all.  The default value for this tag is false.  (Added in
-release 1.21.)
-.TP
 \fBallow_rc4\fP
 Permit the KDC to issue tickets with arcfour\-hmac session keys.
 In future releases, this flag will allow arcfour\-hmac to be used

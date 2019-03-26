@@ -97,17 +97,6 @@ kg_setup_keys(krb5_context context, krb5_gss_ctx_id_rec *ctx, krb5_key subkey,
         return code;
 
     switch (subkey->keyblock.enctype) {
-    case ENCTYPE_DES3_CBC_SHA1:
-        code = kg_copy_keys(context, ctx, subkey);
-        if (code != 0)
-            return code;
-
-        ctx->enc->keyblock.enctype = ENCTYPE_DES3_CBC_RAW;
-        ctx->seq->keyblock.enctype = ENCTYPE_DES3_CBC_RAW;
-        ctx->signalg = SGN_ALG_HMAC_SHA1_DES3_KD;
-        ctx->cksum_size = 20;
-        ctx->sealalg = SEAL_ALG_DES3KD;
-        break;
     case ENCTYPE_ARCFOUR_HMAC:
     case ENCTYPE_ARCFOUR_HMAC_EXP:
         /* RFC 4121 accidentally omits RC4-HMAC-EXP as a "not-newer" enctype,
@@ -287,12 +276,9 @@ kg_verify_checksum_v1(krb5_context context, uint16_t signalg, krb5_key key,
     krb5_crypto_iov iov[3];
     uint8_t ckbuf[20];
 
-    if (signalg == SGN_ALG_HMAC_MD5)
-        type = CKSUMTYPE_HMAC_MD5_ARCFOUR;
-    else if (signalg == SGN_ALG_HMAC_SHA1_DES3_KD)
-        type = CKSUMTYPE_HMAC_SHA1_DES3;
-    else
+    if (signalg != SGN_ALG_HMAC_MD5)
         abort();
+    type = CKSUMTYPE_HMAC_MD5_ARCFOUR;
 
     iov[0].flags = iov[1].flags = KRB5_CRYPTO_TYPE_SIGN_ONLY;
     iov[0].data = make_data((uint8_t *)header, 8);

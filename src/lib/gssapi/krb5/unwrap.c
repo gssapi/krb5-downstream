@@ -32,8 +32,8 @@
 
 #include "gssapiP_krb5.h"
 
-/* The RFC 1964 token format is only used with DES3 and RC4, both of which use
- * an 8-byte confounder. */
+/* The RFC 1964 token format is only used with RC4, which uses an 8-byte
+ * confounder. */
 #define V1_CONFOUNDER_LEN 8
 
 #define V3_HEADER_LEN 16
@@ -109,7 +109,7 @@ unwrap_v1(krb5_context context, OM_uint32 *minor_status,
     sealalg = k5_input_get_uint16_le(in);
     filler = k5_input_get_uint16_le(in);
     seqbytes = k5_input_get_bytes(in, 8);
-    cksum_len = (signalg == SGN_ALG_HMAC_SHA1_DES3_KD) ? 20 : 8;
+    cksum_len = 8;
     cksum = k5_input_get_bytes(in, cksum_len);
 
     /* Validate the header fields, and ensure that there are enough bytes

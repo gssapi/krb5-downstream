@@ -32,16 +32,6 @@
 
 #include "crypto_int.h"
 
-krb5_error_code
-krb5int_des_init_state(const krb5_keyblock *key, krb5_keyusage usage,
-                       krb5_data *state_out)
-{
-    if (alloc_data(state_out, 8))
-        return ENOMEM;
-
-    return 0;
-}
-
 void
 krb5int_default_free_state(krb5_data *state)
 {

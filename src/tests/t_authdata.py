@@ -179,7 +179,7 @@ realm.run([kvno, 'restricted'])
 # preferred krbtgt enctype changes.
 mark('#8139 regression test')
 realm.kinit(realm.user_princ, password('user'), ['-f'])
-realm.run([kadminl, 'cpw', '-randkey', '-keepold', '-e', 'des3-cbc-sha1',
+realm.run([kadminl, 'cpw', '-randkey', '-keepold', '-e', 'aes256-sha2',
            realm.krbtgt_princ])
 realm.run(['./forward'])
 realm.run([kvno, realm.host_princ])

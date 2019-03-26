@@ -339,9 +339,9 @@ typedef unsigned long ck_key_type_t;
 #define CKK_GENERIC_SECRET	(0x10)
 #define CKK_RC2			(0x11)
 #define CKK_RC4			(0x12)
-#define CKK_DES			(0x13)
-#define CKK_DES2		(0x14)
-#define CKK_DES3		(0x15)
+/* #define CKK_DES			(0x13) */
+/* #define CKK_DES2		(0x14) */
+/* #define CKK_DES3		(0x15) */
 #define CKK_CAST		(0x16)
 #define CKK_CAST3		(0x17)
 #define CKK_CAST128		(0x18)

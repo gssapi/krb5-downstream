@@ -86,7 +86,6 @@ krb5_k_verify_checksum
 krb5_k_verify_checksum_iov
 krb5int_aes_encrypt
 krb5int_aes_decrypt
-krb5int_enc_des3
 krb5int_arcfour_gsscrypt
 krb5int_camellia_encrypt
 krb5int_cmac_checksum

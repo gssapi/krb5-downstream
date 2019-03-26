@@ -1,6 +1,6 @@
 mydir=lib$(S)crypto$(S)openssl
 BUILDTOP=$(REL)..$(S)..$(S)..
-SUBDIRS=des enc_provider hash_provider
+SUBDIRS=enc_provider hash_provider
 LOCALINCLUDES=-I$(srcdir)/../krb $(CRYPTO_IMPL_CFLAGS)
 
 STLIBOBJS=\
@@ -27,7 +27,7 @@ SRCS=\
 	$(srcdir)/sha256.c	\
 	$(srcdir)/common.c
 
-SUBDIROBJLISTS= des/OBJS.ST md4/OBJS.ST 	\
+SUBDIROBJLISTS= md4/OBJS.ST 		\
 		md5/OBJS.ST sha1/OBJS.ST sha2/OBJS.ST 	\
 		enc_provider/OBJS.ST 		\
 		hash_provider/OBJS.ST 		\

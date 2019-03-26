@@ -1,25 +1,17 @@
 from k5test import *
 
-# Define some convenience abbreviations for enctypes we will see in
-# test program output.  For background, aes256 and aes128 are "CFX
-# enctypes", meaning that they imply support for RFC 4121, while des3
-# and rc4 are not.  DES3 keys will appear as 'des3-cbc-raw' in
-# t_enctypes output because that's how GSSAPI does raw triple-DES
-# encryption without the RFC3961 framing.
+# Define some convenience abbreviations for enctypes we will see in test
+# program output.  For background, aes256 and aes128 are "CFX enctypes",
+# meaning that they imply support for RFC 4121, while rc4 does not.
 aes256 = 'aes256-cts-hmac-sha1-96'
 aes128 = 'aes128-cts-hmac-sha1-96'
-des3 = 'des3-cbc-sha1'
-d_des3 = 'DEPRECATED:des3-cbc-sha1'
-des3raw = 'des3-cbc-raw'
-d_des3raw = 'DEPRECATED:des3-cbc-raw'
 rc4 = 'arcfour-hmac'
 d_rc4 = 'DEPRECATED:arcfour-hmac'
 
 # These tests make assumptions about the default enctype lists, so set
 # them explicitly rather than relying on the library defaults.
-supp='aes256-cts:normal aes128-cts:normal des3-cbc-sha1:normal rc4-hmac:normal'
-conf = {'libdefaults': {'permitted_enctypes': 'aes des3 rc4',
-                        'allow_des3': 'true', 'allow_rc4': 'true'},
+supp='aes256-cts:normal aes128-cts:normal rc4-hmac:normal'
+conf = {'libdefaults': {'permitted_enctypes': 'aes rc4', 'allow_rc4': 'true'},
         'realms': {'$realm': {'supported_enctypes': supp}}}
 realm = K5Realm(krb5_conf=conf)
 shutil.copyfile(realm.ccache, os.path.join(realm.testdir, 'save'))
@@ -88,19 +80,12 @@ test('both aes128', 'aes128-cts', 'aes128-cts',
 test_err('acc aes128', None, 'aes128-cts',
          'Encryption type aes256-cts-hmac-sha1-96 not permitted')
 
-# If the initiator constrains the permitted session enctypes to des3,
-# no acceptor subkey will be generated because we can't upgrade to a
-# CFX enctype.
-test('init des3', 'des3', None,
-     tktenc=aes256, tktsession=d_des3,
-     proto='rfc1964', isubkey=des3raw, asubkey=None)
-
 # Force the ticket session key to be rc4, so we can test some subkey
 # upgrade cases.  The ticket encryption key remains aes256.
 realm.run([kadminl, 'setstr', realm.host_princ, 'session_enctypes', 'rc4'])
 
 # With no arguments, the initiator should send an upgrade list of
-# [aes256 aes128 des3] and the acceptor should upgrade to an aes256
+# [aes256 aes128] and the acceptor should upgrade to an aes256
 # subkey.
 test('upgrade noargs', None, None,
      tktenc=aes256, tktsession=d_rc4,
@@ -115,13 +100,6 @@ test_err('upgrade init aes', 'aes', None, 'no support for encryption type')
 test('upgrade init aes128+rc4', 'aes128-cts rc4', None,
      tktenc=aes256, tktsession=d_rc4,
      proto='cfx', isubkey=rc4, asubkey=aes128)
-
-# If the initiator permits rc4 but prefers des3, it will send an
-# upgrade list of [des3], but the acceptor won't generate a subkey
-# because des3 isn't a CFX enctype.
-test('upgrade init des3+rc4', 'des3 rc4', None,
-     tktenc=aes256, tktsession=d_rc4,
-     proto='rfc1964', isubkey=rc4, asubkey=None)
 
 # If the acceptor permits only aes128, subkey negotiation will fail
 # because the ticket session key and initiator subkey are

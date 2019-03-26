@@ -39,7 +39,6 @@ Public
    CKSUMTYPE_HMAC_SHA1_96_AES256.rst
    CKSUMTYPE_HMAC_SHA256_128_AES128.rst
    CKSUMTYPE_HMAC_SHA384_192_AES256.rst
-   CKSUMTYPE_HMAC_SHA1_DES3.rst
    CKSUMTYPE_MD5_HMAC_ARCFOUR.rst
    CKSUMTYPE_NIST_SHA.rst
    CKSUMTYPE_RSA_MD4.rst
@@ -397,5 +396,6 @@ Deprecated macros
 .. toctree::
    :maxdepth: 1
 
+   CKSUMTYPE_HMAC_SHA1_DES3.rst
    krb524_convert_creds_kdc.rst
    krb524_init_ets.rst

@@ -43,7 +43,6 @@
 #include "k5-int.h"
 #include "common.h"
 
-#define SGN_ALG_HMAC_SHA1_DES3_KD 0x04
 #define SGN_ALG_HMAC_MD5          0x11
 
 /*
@@ -77,17 +76,12 @@ make_delete_token(gss_krb5_lucid_context_v1_t *lctx, gss_buffer_desc *out)
     ret = krb5_k_create_key(context, &seqkb, &seq);
     check_k5err(context, "krb5_k_create_key", ret);
 
-    if (signalg == SGN_ALG_HMAC_SHA1_DES3_KD) {
-        cktype = CKSUMTYPE_HMAC_SHA1_DES3;
-        cksize = 20;
-        ckusage = 23;
-    } else if (signalg == SGN_ALG_HMAC_MD5) {
-        cktype = CKSUMTYPE_HMAC_MD5_ARCFOUR;
-        cksize = 8;
-        ckusage = 15;
-    } else {
+    if (signalg != SGN_ALG_HMAC_MD5)
         abort();
-    }
+
+    cktype = CKSUMTYPE_HMAC_MD5_ARCFOUR;
+    cksize = 8;
+    ckusage = 15;
 
     tlen = 20 + mech_krb5.length + cksize;
     token = malloc(tlen);

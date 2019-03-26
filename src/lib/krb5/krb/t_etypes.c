@@ -50,17 +50,6 @@ static struct {
       { ENCTYPE_AES256_CTS_HMAC_SHA1_96, 0 },
       0, 0
     },
-    /* Family followed by enctype */
-    { "aes des3-cbc-sha1-kd",
-      { 0 },
-      { ENCTYPE_AES256_CTS_HMAC_SHA1_96, ENCTYPE_AES128_CTS_HMAC_SHA1_96,
-        ENCTYPE_AES256_CTS_HMAC_SHA384_192, ENCTYPE_AES128_CTS_HMAC_SHA256_128,
-        ENCTYPE_DES3_CBC_SHA1, 0 },
-      { ENCTYPE_AES256_CTS_HMAC_SHA1_96, ENCTYPE_AES128_CTS_HMAC_SHA1_96,
-        ENCTYPE_AES256_CTS_HMAC_SHA384_192, ENCTYPE_AES128_CTS_HMAC_SHA256_128,
-        ENCTYPE_DES3_CBC_SHA1, 0 },
-      0, 0
-    },
     /* Family with enctype removed */
     { "camellia -camellia256-cts-cmac",
       { 0 },
@@ -69,44 +58,13 @@ static struct {
     },
     /* Default set with family added and enctype removed */
     { "DEFAULT +aes -arcfour-hmac-md5",
-      { ENCTYPE_ARCFOUR_HMAC, ENCTYPE_DES3_CBC_SHA1, 0 },
-      { ENCTYPE_DES3_CBC_SHA1, ENCTYPE_AES256_CTS_HMAC_SHA1_96,
+      { ENCTYPE_ARCFOUR_HMAC, 0 },
+      { ENCTYPE_AES256_CTS_HMAC_SHA1_96,
         ENCTYPE_AES128_CTS_HMAC_SHA1_96, ENCTYPE_AES256_CTS_HMAC_SHA384_192,
         ENCTYPE_AES128_CTS_HMAC_SHA256_128, 0 },
-      { ENCTYPE_DES3_CBC_SHA1,
-        ENCTYPE_AES256_CTS_HMAC_SHA1_96, ENCTYPE_AES128_CTS_HMAC_SHA1_96,
+      { ENCTYPE_AES256_CTS_HMAC_SHA1_96, ENCTYPE_AES128_CTS_HMAC_SHA1_96,
         ENCTYPE_AES256_CTS_HMAC_SHA384_192, ENCTYPE_AES128_CTS_HMAC_SHA256_128,
         0 },
-      0, 0
-    },
-    /* Default set with families removed and enctypes added (one redundant) */
-    { "DEFAULT -des3 rc4-hmac rc4-hmac-exp",
-      { ENCTYPE_AES256_CTS_HMAC_SHA1_96, ENCTYPE_AES128_CTS_HMAC_SHA1_96,
-        ENCTYPE_DES3_CBC_SHA1, ENCTYPE_ARCFOUR_HMAC, 0 },
-      { ENCTYPE_AES256_CTS_HMAC_SHA1_96, ENCTYPE_AES128_CTS_HMAC_SHA1_96,
-        ENCTYPE_ARCFOUR_HMAC, 0 },
-      { ENCTYPE_AES256_CTS_HMAC_SHA1_96, ENCTYPE_AES128_CTS_HMAC_SHA1_96,
-        ENCTYPE_ARCFOUR_HMAC, ENCTYPE_ARCFOUR_HMAC_EXP, 0 },
-      0, 0
-    },
-    /* Default set with family moved to front */
-    { "des3 +DEFAULT",
-      { ENCTYPE_AES256_CTS_HMAC_SHA1_96, ENCTYPE_AES128_CTS_HMAC_SHA1_96,
-        ENCTYPE_DES3_CBC_SHA1, 0 },
-      { ENCTYPE_DES3_CBC_SHA1, ENCTYPE_AES256_CTS_HMAC_SHA1_96,
-        ENCTYPE_AES128_CTS_HMAC_SHA1_96, 0 },
-      { ENCTYPE_DES3_CBC_SHA1, ENCTYPE_AES256_CTS_HMAC_SHA1_96,
-        ENCTYPE_AES128_CTS_HMAC_SHA1_96, 0 },
-      0, 0
-    },
-    /* Two families with default set removed (exotic case), enctype added */
-    { "aes +rc4 -DEFaulT des3-hmac-sha1",
-      { ENCTYPE_AES128_CTS_HMAC_SHA1_96, ENCTYPE_DES3_CBC_SHA1,
-        ENCTYPE_ARCFOUR_HMAC, 0 },
-      { ENCTYPE_AES256_CTS_HMAC_SHA1_96, ENCTYPE_AES256_CTS_HMAC_SHA384_192,
-        ENCTYPE_AES128_CTS_HMAC_SHA256_128, ENCTYPE_DES3_CBC_SHA1, 0 },
-      { ENCTYPE_AES256_CTS_HMAC_SHA1_96, ENCTYPE_AES256_CTS_HMAC_SHA384_192,
-        ENCTYPE_AES128_CTS_HMAC_SHA256_128, ENCTYPE_DES3_CBC_SHA1, 0 },
       0, 0
     },
     /* Test krb5_set_default_in_tkt_ktypes */

@@ -81,11 +81,11 @@ Triple-DES and RC4 transitions
 ------------------------------
 
 Beginning with the krb5-1.21 release, the KDC will not issue tickets
-with triple-DES or RC4 session keys unless explicitly configured using
-the new allow_des3 and allow_rc4 variables in [libdefaults].  To
-facilitate the negotiation of session keys, the KDC will assume that
-all services can handle aes256-sha1 session keys unless the service
-principal has a session_enctypes string attribute.
+with RC4 session keys unless explicitly configured using the new
+allow_rc4 variable in [libdefaults].  To facilitate the negotiation of
+session keys, the KDC will assume that all services can handle
+aes256-sha1 session keys unless the service principal has a
+session_enctypes string attribute.
 
 Beginning with the krb5-1.19 release, a warning will be issued if
 initial credentials are acquired using the des3-cbc-sha1 encryption
@@ -171,6 +171,9 @@ Protocol evolution:
 * The PKINIT preauth module supports elliptic curve client
   certificates, ECDH key exchange, and the Microsoft paChecksum2
   field.
+
+* The KDC will no longer issue tickets with RC4 session keys unless
+  explicitly configured with the new allow_rc4 variable.
 
 * The IAKERB implementation has been changed to comply with the most
   recent draft standard and to support realm discovery.

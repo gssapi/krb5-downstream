@@ -26,7 +26,6 @@ conf3 = {'libdefaults': {
         'default_tgs_enctypes': 'rc4-hmac,aes128-cts'}}
 conf4 = {'libdefaults': {'permitted_enctypes': 'aes256-cts'}}
 conf5 = {'libdefaults': {'allow_rc4': 'true'}}
-conf6 = {'libdefaults': {'allow_des3': 'true'}}
 # Test with client request and session_enctypes preferring aes128, but
 # aes256 long-term key.
 realm = K5Realm(krb5_conf=conf1, create_host=False, get_creds=False)
@@ -76,13 +75,6 @@ realm = K5Realm(krb5_conf=conf5, create_host=False, get_creds=False)
 realm.run([kadminl, 'addprinc', '-randkey', '-e', 'aes256-cts', 'server'])
 realm.run([kadminl, 'setstr', 'server', 'session_enctypes', 'rc4-hmac'])
 test_kvno(realm, 'DEPRECATED:arcfour-hmac', 'aes256-cts-hmac-sha1-96')
-realm.stop()
-
-# 6: allow_des3 permits negotiation of des3-cbc-sha1 session key.
-realm = K5Realm(krb5_conf=conf6, create_host=False, get_creds=False)
-realm.run([kadminl, 'addprinc', '-randkey', '-e', 'aes256-cts', 'server'])
-realm.run([kadminl, 'setstr', 'server', 'session_enctypes', 'des3-cbc-sha1'])
-test_kvno(realm, 'DEPRECATED:des3-cbc-sha1', 'aes256-cts-hmac-sha1-96')
 realm.stop()
 
 # 7: default config negotiates aes256-sha1 session key for RC4-only service.

@@ -52,12 +52,6 @@ const struct krb5_cksumtypes krb5int_cksumtypes_list[] = {
       krb5int_unkeyed_checksum, NULL,
       20, 20, CKSUM_UNKEYED },
 
-    { CKSUMTYPE_HMAC_SHA1_DES3,
-      "hmac-sha1-des3", { "hmac-sha1-des3-kd" }, "HMAC-SHA1 DES3 key",
-      &krb5int_enc_des3, &krb5int_hash_sha1,
-      krb5int_dk_checksum, NULL,
-      20, 20, 0 },
-
     { CKSUMTYPE_HMAC_MD5_ARCFOUR,
       "hmac-md5-rc4", { "hmac-md5-enc", "hmac-md5-earcfour" },
       "Microsoft HMAC MD5",

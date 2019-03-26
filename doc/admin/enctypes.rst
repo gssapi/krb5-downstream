@@ -49,8 +49,8 @@ The KDC chooses the session key enctype by taking the intersection of
 its **permitted_enctypes** list, the list of long-term keys for the
 most recent kvno of the service, and the client's requested list of
 enctypes.  Starting in krb5-1.21, all services are assumed to support
-aes256-cts-hmac-sha1-96; also, des3-cbc-sha1 and arcfour-hmac session
-keys will not be issued by default.
+aes256-cts-hmac-sha1-96; also, arcfour-hmac session keys will not be
+issued by default.
 
 Starting in krb5-1.11, it is possible to set a string attribute on a
 service principal to control what session key enctypes the KDC may
@@ -89,13 +89,6 @@ affect how enctypes are chosen.
     set this to *true* unless the use of weak enctypes is an
     acceptable risk for your environment and the weak enctypes are
     required for backward compatibility.
-
-**allow_des3**
-    was added in release 1.21 and defaults to *false*.  Unless this
-    flag is set to *true*, the KDC will not issue tickets with
-    des3-cbc-sha1 session keys.  In a future release, this flag will
-    control whether des3-cbc-sha1 is permitted in similar fashion to
-    weak enctypes.
 
 **allow_rc4**
     was added in release 1.21 and defaults to *false*.  Unless this
@@ -146,7 +139,7 @@ enctype                    weak?      krb5     Windows
 des-cbc-crc                weak       <1.18    >=2000
 des-cbc-md4                weak       <1.18    ?
 des-cbc-md5                weak       <1.18    >=2000
-des3-cbc-sha1              deprecated >=1.1    none
+des3-cbc-sha1              deprecated <1.18    none
 arcfour-hmac               deprecated >=1.3    >=2000
 arcfour-hmac-exp           weak       >=1.3    >=2000
 aes128-cts-hmac-sha1-96               >=1.3    >=Vista
@@ -165,9 +158,11 @@ default.
 krb5 releases 1.17 and later flag deprecated encryption types
 (including ``des3-cbc-sha1`` and ``arcfour-hmac``) in KDC logs and
 kadmin output.  krb5 release 1.19 issues a warning during initial
-authentication if ``des3-cbc-sha1`` is used.  Future releases will
-disable ``des3-cbc-sha1`` by default and eventually remove support for
-it.
+authentication if ``des3-cbc-sha1`` is used.
+
+krb5 releases 1.18 and later remove single-DES and 3DES
+(downstream-only patch) enctype support.  Microsoft Windows never
+supported 3DES.
 
 
 Migrating away from older encryption types

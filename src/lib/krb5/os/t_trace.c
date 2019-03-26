@@ -65,8 +65,8 @@ main (int argc, char *argv[])
     krb5_principal princ = &principal_data;
     krb5_pa_data padata, padata2, **padatap;
     krb5_enctype enctypes[4] = {
-        ENCTYPE_DES3_CBC_SHA, ENCTYPE_ARCFOUR_HMAC_EXP, ENCTYPE_UNKNOWN,
-        ENCTYPE_NULL};
+        ENCTYPE_AES128_CTS_HMAC_SHA1_96, ENCTYPE_ARCFOUR_HMAC_EXP,
+        ENCTYPE_UNKNOWN, ENCTYPE_NULL};
     krb5_ccache ccache;
     krb5_keytab keytab;
     krb5_creds creds;

@@ -142,19 +142,12 @@ make_seal_token_v1 (krb5_context context,
 
     /* pad the plaintext, encrypt if needed, and stick it in the token */
 
-    /* initialize the the checksum */
-    switch (signalg) {
-    case SGN_ALG_HMAC_SHA1_DES3_KD:
-        md5cksum.checksum_type = CKSUMTYPE_HMAC_SHA1_DES3;
-        break;
-    case SGN_ALG_HMAC_MD5:
-        md5cksum.checksum_type = CKSUMTYPE_HMAC_MD5_ARCFOUR;
-        if (toktype != KG_TOK_SEAL_MSG)
-            sign_usage = 15;
-        break;
-    default:
-        abort ();
-    }
+    if (signalg != SGN_ALG_HMAC_MD5)
+        abort();
+
+    md5cksum.checksum_type = CKSUMTYPE_HMAC_MD5_ARCFOUR;
+    if (toktype != KG_TOK_SEAL_MSG)
+        sign_usage = 15;
 
     code = krb5_c_checksum_length(context, md5cksum.checksum_type, &sumlen);
     if (code) {
@@ -203,20 +196,8 @@ make_seal_token_v1 (krb5_context context,
         gssalloc_free(t);
         return(code);
     }
-    switch(signalg) {
-    case SGN_ALG_HMAC_SHA1_DES3_KD:
-        /*
-         * Using key derivation, the call to krb5_c_make_checksum
-         * already dealt with encrypting.
-         */
-        if (md5cksum.length != cksum_size)
-            abort ();
-        memcpy(checksum, md5cksum.contents, md5cksum.length);
-        break;
-    case SGN_ALG_HMAC_MD5:
-        memcpy(checksum, md5cksum.contents, cksum_size);
-        break;
-    }
+
+    memcpy(checksum, md5cksum.contents, cksum_size);
 
     krb5_free_checksum_contents(context, &md5cksum);
 

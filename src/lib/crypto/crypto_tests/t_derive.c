@@ -38,41 +38,6 @@ struct test {
     enum deriv_alg alg;
     krb5_data expected_key;
 } test_cases[] = {
-    /* Kc, Ke, Kei for a DES3 key */
-    {
-        ENCTYPE_DES3_CBC_SHA1,
-        { KV5M_DATA, 24,
-          "\x85\x0B\xB5\x13\x58\x54\x8C\xD0\x5E\x86\x76\x8C\x31\x3E\x3B\xFE"
-          "\xF7\x51\x19\x37\xDC\xF7\x2C\x3E" },
-        { KV5M_DATA, 5, "\0\0\0\2\x99" },
-        DERIVE_RFC3961,
-        { KV5M_DATA, 24,
-          "\xF7\x8C\x49\x6D\x16\xE6\xC2\xDA\xE0\xE0\xB6\xC2\x40\x57\xA8\x4C"
-          "\x04\x26\xAE\xEF\x26\xFD\x6D\xCE" }
-    },
-    {
-        ENCTYPE_DES3_CBC_SHA1,
-        { KV5M_DATA, 24,
-          "\x85\x0B\xB5\x13\x58\x54\x8C\xD0\x5E\x86\x76\x8C\x31\x3E\x3B\xFE"
-          "\xF7\x51\x19\x37\xDC\xF7\x2C\x3E" },
-        { KV5M_DATA, 5, "\0\0\0\2\xAA" },
-        DERIVE_RFC3961,
-        { KV5M_DATA, 24,
-          "\x5B\x57\x23\xD0\xB6\x34\xCB\x68\x4C\x3E\xBA\x52\x64\xE9\xA7\x0D"
-          "\x52\xE6\x83\x23\x1A\xD3\xC4\xCE" }
-    },
-    {
-        ENCTYPE_DES3_CBC_SHA1,
-        { KV5M_DATA, 24,
-          "\x85\x0B\xB5\x13\x58\x54\x8C\xD0\x5E\x86\x76\x8C\x31\x3E\x3B\xFE"
-          "\xF7\x51\x19\x37\xDC\xF7\x2C\x3E" },
-        { KV5M_DATA, 5, "\0\0\0\2\x55" },
-        DERIVE_RFC3961,
-        { KV5M_DATA, 24,
-          "\xA7\x7C\x94\x98\x0E\x9B\x73\x45\xA8\x15\x25\xC4\x23\xA7\x37\xCE"
-          "\x67\xF4\xCD\x91\xB6\xB3\xDA\x45" }
-    },
-
     /* Kc, Ke, Ki for an AES-128 key */
     {
         ENCTYPE_AES128_CTS_HMAC_SHA1_96,
@@ -286,7 +251,6 @@ static const struct krb5_enc_provider *
 get_enc_provider(krb5_enctype enctype)
 {
     switch (enctype) {
-    case ENCTYPE_DES3_CBC_SHA1:              return &krb5int_enc_des3;
     case ENCTYPE_AES128_CTS_HMAC_SHA1_96:    return &krb5int_enc_aes128;
     case ENCTYPE_AES256_CTS_HMAC_SHA1_96:    return &krb5int_enc_aes256;
     case ENCTYPE_CAMELLIA128_CTS_CMAC:       return &krb5int_enc_camellia128;
