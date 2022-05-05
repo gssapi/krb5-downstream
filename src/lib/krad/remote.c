@@ -33,6 +33,7 @@
 
 #include <string.h>
 #include <unistd.h>
+#include <stdbool.h>
 
 #include <sys/un.h>
 
@@ -73,6 +74,35 @@ on_io(verto_ctx *ctx, verto_ev *ev);
 
 static void
 on_timeout(verto_ctx *ctx, verto_ev *ev);
+
+static in_addr_t get_in_addr(struct addrinfo *info)
+{ return ((struct sockaddr_in *)(info->ai_addr))->sin_addr.s_addr; }
+
+static struct in6_addr *get_in6_addr(struct addrinfo *info)
+{ return &(((struct sockaddr_in6 *)(info->ai_addr))->sin6_addr); }
+
+static bool is_inet_localhost(struct addrinfo *info)
+{
+    struct addrinfo *p;
+
+    for (p = info; p; p = p->ai_next) {
+        switch (p->ai_family) {
+            case AF_INET:
+                if (IN_LOOPBACKNET != (get_in_addr(p) & IN_CLASSA_NET
+                                                      >> IN_CLASSA_NSHIFT))
+                    return false;
+                break;
+            case AF_INET6:
+                if (!IN6_IS_ADDR_LOOPBACK(get_in6_addr(p)))
+                    return false;
+                break;
+            default:
+                return false;
+        }
+    }
+
+    return true;
+}
 
 /* Iterate over the set of outstanding packets. */
 static const krad_packet *
@@ -459,8 +489,9 @@ kr_remote_send(krad_remote *rr, krad_code code, krad_attrset *attrs,
                                      iterator, &r, &tmp);
     if (retval != 0)
         goto error;
-    else if (tmp->is_fips && rr->info->ai_family != AF_LOCAL &&
-        rr->info->ai_family != AF_UNIX) {
+    else if (tmp->is_fips && rr->info->ai_family != AF_LOCAL
+                          && rr->info->ai_family != AF_UNIX
+                          && !is_inet_localhost(rr->info)) {
         /* This would expose cleartext passwords, so abort. */
         retval = ESOCKTNOSUPPORT;
         goto error;
