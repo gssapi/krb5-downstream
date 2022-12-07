@@ -1,3 +1,4 @@
+from os.path import exists
 from k5test import *
 
 entries = ('URI _kerberos.TEST krb5srv::kkdcp:https://kdc1 1 1\n',
@@ -37,8 +38,14 @@ realm.env['RESOLV_WRAPPER_HOSTS'] = hosts_filename
 out = realm.run(['./t_locate_kdc', 'TEST'], env=realm.env)
 l = out.splitlines()
 
+if (exists('/usr/lib/krb5/plugins/libkrb5/sssd_krb5_locator_plugin.so')
+    or exists('/usr/lib64/krb5/plugins/libkrb5/sssd_krb5_locator_plugin.so')):
+    line_range = range(6, 14)
+else:
+    line_range = range(4, 12)
+
 j = 0
-for i in range(4, 12):
+for i in line_range:
     if l[i].strip() != expected[j]:
         fail('URI answers do not match')
     j += 1
