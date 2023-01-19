@@ -275,7 +275,7 @@ lookup_msgauth_addr(const krad_packet *pkt)
  * auth, which may be from pkt or from a corresponding request.
  */
 static krb5_error_code
-calculate_mac(const char *secret, const krad_packet *pkt,
+calculate_mac(krb5_context ctx, const char *secret, const krad_packet *pkt,
               const uint8_t auth[AUTH_FIELD_SIZE],
               uint8_t mac_out[MD5_DIGEST_SIZE])
 {
@@ -285,6 +285,10 @@ calculate_mac(const char *secret, const krad_packet *pkt,
     static const uint8_t zeroed_msgauth[MSGAUTH_SIZE] = {
         KRAD_ATTR_MESSAGE_AUTHENTICATOR, MSGAUTH_SIZE
     };
+
+    /* Do not use HMAC-MD5 if not explicitly allowed */
+    if (kr_use_fips(ctx))
+        return KRB5_CRYPTO_INTERNAL;
 
     msgauth_attr = lookup_msgauth_addr(pkt);
     if (msgauth_attr == NULL)
@@ -387,7 +391,8 @@ krad_packet_new_request(krb5_context ctx, const char *secret, krad_code code,
 
     if (msgauth_required) {
         /* Calculate and set the Message-Authenticator MAC. */
-        retval = calculate_mac(secret, pkt, pkt_auth(pkt), pkt_attr(pkt) + 2);
+        retval = calculate_mac(ctx, secret, pkt, pkt_auth(pkt),
+                               pkt_attr(pkt) + 2);
         if (retval != 0)
             goto error;
     }
@@ -448,7 +453,7 @@ krad_packet_new_response(krb5_context ctx, const char *secret, krad_code code,
          * section 5.14, use the authenticator from the request, not from the
          * response.
          */
-        retval = calculate_mac(secret, pkt, pkt_auth(request),
+        retval = calculate_mac(ctx, secret, pkt, pkt_auth(request),
                                pkt_attr(pkt) + 2);
         if (retval != 0)
             goto error;
@@ -470,7 +475,7 @@ error:
 /* Verify the Message-Authenticator value in pkt, using the provided
  * authenticator (which may be from pkt or from a corresponding request). */
 static krb5_error_code
-verify_msgauth(const char *secret, const krad_packet *pkt,
+verify_msgauth(krb5_context ctx, const char *secret, const krad_packet *pkt,
                const uint8_t auth[AUTH_FIELD_SIZE])
 {
     uint8_t mac[MD5_DIGEST_SIZE];
@@ -481,7 +486,7 @@ verify_msgauth(const char *secret, const krad_packet *pkt,
     if (msgauth == NULL)
         return ENODATA;
 
-    retval = calculate_mac(secret, pkt, auth, mac);
+    retval = calculate_mac(ctx, secret, pkt, auth, mac);
     if (retval)
         return retval;
 
@@ -554,7 +559,7 @@ krad_packet_decode_request(krb5_context ctx, const char *secret,
 
     /* Verify Message-Authenticator if present. */
     if (has_pkt_msgauth(req)) {
-        retval = verify_msgauth(secret, req, pkt_auth(req));
+        retval = verify_msgauth(ctx, secret, req, pkt_auth(req));
         if (retval) {
             krad_packet_free(req);
             return retval;
@@ -606,7 +611,7 @@ krad_packet_decode_response(krb5_context ctx, const char *secret,
 
             /* Verify Message-Authenticator if present. */
             if (has_pkt_msgauth(*rsppkt)) {
-                if (verify_msgauth(secret, *rsppkt, pkt_auth(tmp)) != 0)
+                if (verify_msgauth(ctx, secret, *rsppkt, pkt_auth(tmp)) != 0)
                     continue;
             }
 

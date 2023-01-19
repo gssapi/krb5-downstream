@@ -111,11 +111,7 @@ map_digest(const struct krb5_hash_provider *hash)
         return EVP_sha256();
     else if (hash == &krb5int_hash_sha384)
         return EVP_sha384();
-
-    if (EVP_default_properties_is_fips_enabled(NULL))
-        return NULL;
-
-    if (hash == &krb5int_hash_md5)
+    else if (hash == &krb5int_hash_md5)
         return EVP_md5();
     else if (hash == &krb5int_hash_md4)
         return EVP_md4();
@@ -137,13 +133,19 @@ krb5int_hmac_keyblock(const struct krb5_hash_provider *hash,
     EVP_MAC_CTX *ctx = NULL;
     OSSL_PARAM params[2], *p = params;
     size_t i = 0, md_len;
+    OSSL_LIB_CTX *ossl_libctx;
+    krb5_error_code err;
 
     if (md == NULL || keyblock->length > hash->blocksize)
         return KRB5_CRYPTO_INTERNAL;
     if (output->length < hash->hashsize)
         return KRB5_BAD_MSIZE;
 
-    mac = EVP_MAC_fetch(NULL, "HMAC", NULL);
+    err = k5_get_ossl_legacy_libctx(&ossl_libctx);
+    if (err)
+        return err;
+
+    mac = EVP_MAC_fetch(ossl_libctx, "HMAC", NULL);
     if (mac == NULL)
         return KRB5_CRYPTO_INTERNAL;
 

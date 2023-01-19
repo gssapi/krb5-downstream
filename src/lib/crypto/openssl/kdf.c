@@ -200,7 +200,7 @@ k5_derive_random_rfc3961(const struct krb5_enc_provider *enc, krb5_key key,
         goto done;
     }
 
-    kdf = EVP_KDF_fetch(NULL, "KRB5KDF", NULL);
+    kdf = EVP_KDF_fetch(NULL, "KRB5KDF", "-fips");
     if (kdf == NULL) {
         ret = KRB5_CRYPTO_INTERNAL;
         goto done;
