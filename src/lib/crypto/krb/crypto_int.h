@@ -36,6 +36,9 @@
 
 #include <openssl/opensslv.h>
 #if OPENSSL_VERSION_NUMBER >= 0x30000000L
+
+#include <openssl/provider.h>
+
 /*
  * OpenSSL 3.0 relegates MD4 and RC4 to the legacy provider, which must be
  * explicitly loaded into a library context.  Performing this loading within a
@@ -670,5 +673,11 @@ iov_cursor_advance(struct iov_cursor *c, size_t nblocks)
     c->in_pos += nblocks * c->block_size;
     c->out_pos += nblocks * c->block_size;
 }
+
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+
+krb5_error_code k5_get_ossl_legacy_libctx(OSSL_LIB_CTX **libctx);
+
+#endif /* OPENSSL_VERSION_NUMBER >= 0x30000000L */
 
 #endif /* CRYPTO_INT_H */

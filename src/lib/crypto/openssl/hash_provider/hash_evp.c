@@ -60,11 +60,6 @@ hash_evp(const EVP_MD *type, const krb5_crypto_iov *data, size_t num_data,
     if (ctx == NULL)
         return ENOMEM;
 
-    if (type == EVP_md4() || type == EVP_md5()) {
-        /* See comments below in hash_md4() and hash_md5(). */
-        EVP_MD_CTX_set_flags(ctx, EVP_MD_CTX_FLAG_NON_FIPS_ALLOW);
-    }
-
     ok = EVP_DigestInit_ex(ctx, type, NULL);
     for (i = 0; i < num_data; i++) {
         if (!SIGN_IOV(&data[i]))
@@ -77,6 +72,32 @@ hash_evp(const EVP_MD *type, const krb5_crypto_iov *data, size_t num_data,
     return ok ? 0 : KRB5_CRYPTO_INTERNAL;
 }
 
+static krb5_error_code
+hash_legacy_evp(const char *algo, const krb5_crypto_iov *data, size_t num_data,
+                krb5_data *output)
+{
+    krb5_error_code err;
+    OSSL_LIB_CTX *ossl_libctx;
+    EVP_MD *md = NULL;
+
+    err = k5_get_ossl_legacy_libctx(&ossl_libctx);
+    if (err)
+        goto end;
+
+    md = EVP_MD_fetch(ossl_libctx, algo, NULL);
+    if (!md) {
+        err = KRB5_CRYPTO_INTERNAL;
+        goto end;
+    }
+
+    err = hash_evp(md, data, num_data, output);
+
+end:
+    if (md)
+        EVP_MD_free(md);
+
+    return err;
+}
 #endif
 
 #ifdef K5_OPENSSL_MD4
@@ -88,7 +109,9 @@ hash_md4(const krb5_crypto_iov *data, size_t num_data, krb5_data *output)
      * by IPA.  These keys are only used along a (separately) secured channel
      * for legacy reasons when performing trusts to Active Directory.
      */
-    return hash_evp(EVP_md4(), data, num_data, output);
+    return EVP_default_properties_is_fips_enabled(NULL)
+        ? hash_legacy_evp("MD4", data, num_data, output)
+            : hash_evp(EVP_md4(), data, num_data, output);
 }
 
 const struct krb5_hash_provider krb5int_hash_md4 = {
@@ -100,9 +123,13 @@ const struct krb5_hash_provider krb5int_hash_md4 = {
 static krb5_error_code
 hash_md5(const krb5_crypto_iov *data, size_t num_data, krb5_data *output)
 {
-    /* MD5 is needed in FIPS mode for communication with RADIUS servers.  This
-     * is gated in libkrad by libdefaults->radius_md5_fips_override. */
-    return hash_evp(EVP_md5(), data, num_data, output);
+    /*
+     * MD5 is needed in FIPS mode for communication with RADIUS servers.  This
+     * is gated in libkrad by libdefaults->radius_md5_fips_override.
+     */
+    return EVP_default_properties_is_fips_enabled(NULL)
+        ? hash_legacy_evp("MD5", data, num_data, output)
+            : hash_evp(EVP_md5(), data, num_data, output);
 }
 
 const struct krb5_hash_provider krb5int_hash_md5 = {

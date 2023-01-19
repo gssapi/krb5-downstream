@@ -76,10 +76,10 @@ static void
 on_timeout(verto_ctx *ctx, verto_ev *ev);
 
 static in_addr_t get_in_addr(struct addrinfo *info)
-{ return ((struct sockaddr_in *)(info->ai_addr))->sin_addr.s_addr; }
+{ return sa2sin(info->ai_addr)->sin_addr.s_addr; }
 
-static struct in6_addr *get_in6_addr(struct addrinfo *info)
-{ return &(((struct sockaddr_in6 *)(info->ai_addr))->sin6_addr); }
+static const struct in6_addr *get_in6_addr(struct addrinfo *info)
+{ return &sa2sin6(info->ai_addr)->sin6_addr; }
 
 static bool is_inet_localhost(struct addrinfo *info)
 {
