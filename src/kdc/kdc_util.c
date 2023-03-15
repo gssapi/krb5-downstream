@@ -566,16 +566,36 @@ cleanup:
 static krb5_error_code
 try_verify_pac(krb5_context context, const krb5_enc_tkt_part *enc_tkt,
                krb5_db_entry *server, krb5_keyblock *server_key,
-               const krb5_keyblock *tgt_key, krb5_pac *pac_out)
+               krb5_db_entry *tgt, const krb5_keyblock *tgt_key,
+               krb5_pac *pac_out)
 {
     krb5_error_code ret;
+    krb5_boolean optional_tkt_chksum;
+    char *str = NULL;
     krb5_keyblock *privsvr_key;
 
     ret = pac_privsvr_key(context, server, tgt_key, &privsvr_key);
     if (ret)
         return ret;
-    ret = krb5_kdc_verify_ticket(context, enc_tkt, server->princ, server_key,
-                                 privsvr_key, pac_out);
+
+    /* Check if the absence of ticket signature is tolerated for this realm */
+    ret = krb5_dbe_get_string(context, tgt,
+                              KRB5_KDB_SK_OPTIONAL_PAC_TKT_CHKSUM, &str);
+    /* TODO: should be using _krb5_conf_boolean(), but os-proto.h is not
+     * available here.
+     */
+    optional_tkt_chksum = !ret && str && (strncasecmp(str, "true", 4) == 0
+                                       || strncasecmp(str, "t",    1) == 0
+                                       || strncasecmp(str, "yes",  3) == 0
+                                       || strncasecmp(str, "y",    1) == 0
+                                       || strncasecmp(str, "1",    1) == 0
+                                       || strncasecmp(str, "on",   2) == 0);
+
+    krb5_dbe_free_string(context, str);
+
+    ret = krb5_kdc_verify_ticket_ext(context, enc_tkt, server->princ,
+                                     server_key, privsvr_key,
+                                     optional_tkt_chksum, pac_out);
     krb5_free_keyblock(context, privsvr_key);
     return ret;
 }
@@ -605,7 +625,7 @@ get_verified_pac(krb5_context context, const krb5_enc_tkt_part *enc_tkt,
                                       server_key, NULL, pac_out);
     }
 
-    ret = try_verify_pac(context, enc_tkt, server, server_key, tgt_key,
+    ret = try_verify_pac(context, enc_tkt, server, server_key, tgt, tgt_key,
                          pac_out);
     if (ret != KRB5KRB_AP_ERR_MODIFIED && ret != KRB5_BAD_ENCTYPE)
         return ret;
@@ -619,8 +639,8 @@ get_verified_pac(krb5_context context, const krb5_enc_tkt_part *enc_tkt,
         ret = krb5_dbe_decrypt_key_data(context, NULL, kd, &old_key, NULL);
         if (ret)
             return ret;
-        ret = try_verify_pac(context, enc_tkt, server, server_key, &old_key,
-                             pac_out);
+        ret = try_verify_pac(context, enc_tkt, server, server_key, tgt,
+                             &old_key, pac_out);
         krb5_free_keyblock_contents(context, &old_key);
         if (!ret)
             return 0;

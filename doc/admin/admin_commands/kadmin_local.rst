@@ -676,6 +676,12 @@ KDC:
     Directory realm when using aes-sha2 keys on the local krbtgt
     entry.
 
+**optional_pac_tkt_chksum**
+    Boolean value defining the behavior of the KDC in case an expected
+    ticket checksum signed with one of this principal keys is not
+    present in the PAC. This is typically the case for TGS or
+    cross-realm TGS principals when processing S4U2Proxy requests.
+
 This command requires the **modify** privilege.
 
 Alias: **setstr**

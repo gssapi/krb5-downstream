@@ -733,6 +733,12 @@ encryption type.  It may be necessary to set this value to
 \(dqaes256\-sha1\(dq on the cross\-realm krbtgt entry for an Active
 Directory realm when using aes\-sha2 keys on the local krbtgt
 entry.
+.TP
+\fBoptional_pac_tkt_chksum\fP
+Boolean value defining the behavior of the KDC in case an expected ticket
+checksum signed with one of this principal keys is not present in the PAC. This
+is typically the case for TGS or cross-realm TGS principals when processing
+S4U2Proxy requests.
 .UNINDENT
 .sp
 This command requires the \fBmodify\fP privilege.
