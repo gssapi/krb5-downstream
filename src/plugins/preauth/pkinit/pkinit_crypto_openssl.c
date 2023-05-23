@@ -1985,8 +1985,15 @@ cms_signeddata_verify(krb5_context context,
     if (oid == NULL)
         goto cleanup;
 
+    /* Do not use FIPS provider (even in FIPS mode) because it keeps from
+     * allowing SHA-1 signature verification using the SHA1 crypto-module
+     */
+    cms = CMS_ContentInfo_new_ex(NULL, "-fips");
+    if (!cms)
+        goto cleanup;
+
     /* decode received CMS message */
-    if ((cms = d2i_CMS_ContentInfo(NULL, &p, (int)signed_data_len)) == NULL) {
+    if (!d2i_CMS_ContentInfo(&cms, &p, (int)signed_data_len)) {
         retval = oerr(context, 0, _("Failed to decode CMS message"));
         goto cleanup;
     }
