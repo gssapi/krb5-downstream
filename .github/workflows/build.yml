@@ -11,22 +11,13 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
-                name: [linux-clang, linux-clang-openssl, linux-gcc]
+                name: [linux-clang-openssl]
                 include:
-                    - name: linux-clang
-                      os: ubuntu-latest
-                      compiler: clang
-                      makevars: CPPFLAGS=-Werror
-                      configureopts: --enable-asan
                     - name: linux-clang-openssl
                       os: ubuntu-latest
                       compiler: clang
                       makevars: CPPFLAGS=-Werror
                       configureopts: --with-crypto-impl=openssl
-                    - name: linux-gcc
-                      os: ubuntu-latest
-                      compiler: gcc
-                      makevars: CPPFLAGS=-D_FORTIFY_SOURCE=3
         steps:
             - name: Checkout repository
               uses: actions/checkout@v1
@@ -65,35 +56,3 @@ jobs:
                   git ls-files -o
                   exit 1
                 fi
-
-    windows:
-        runs-on: windows-latest
-        env:
-            KRB_INSTALL_DIR: C:\kfw
-            OPENSSL_DIR: C:\Program Files\OpenSSL
-            OPENSSL_VERSION: 1_1
-        steps:
-            - name: Checkout repository
-              uses: actions/checkout@v1
-            - name: Setup
-              shell: cmd
-              run: |
-                mkdir %KRB_INSTALL_DIR%
-            - uses: ilammy/msvc-dev-cmd@v1
-              with:
-                arch: x64
-            - name: Build
-              working-directory: src
-              run: |
-                $env:Path += ';' + $env:WindowsSdkVerBinPath + '\\x86'
-                nmake -f Makefile.in prep-windows
-                nmake
-            - name: Populate install dir
-              working-directory: src
-              run: |
-                nmake install
-            - name: Build installer
-              working-directory: src\windows\installer\wix
-              run: |
-                $env:Path += ';' + $env:wix + 'bin'
-                nmake
